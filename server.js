@@ -1276,9 +1276,7 @@ app.get(
       )
       .all();
 
-    res.json({
-      restaurants,
-    });
+    res.json(restaurants);
   }
 );
 
