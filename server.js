@@ -998,8 +998,8 @@ app.post(
   (req, res) => {
     try {
       const restaurantId = Number(
-        req.body.restaurantId
-      );
+  req.body.restaurant_id
+);
 
       const name = String(
         req.body.name || ""
