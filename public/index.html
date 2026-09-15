@@ -1,781 +1,812 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Djalil Delivery</title>
-
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-/>
-
-<style>
-:root{
-  --yellow:#ffd21c;
-  --black:#111;
-  --gray:#f5f5f5;
-  --white:#fff;
-  --red:#e53935;
-  --green:#19a463;
-}
-
-*{
-  box-sizing:border-box;
-}
-
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:var(--gray);
-  color:var(--black);
-}
-
-button,
-input,
-textarea{
-  font-family:inherit;
-}
-
-button{
-  cursor:pointer;
-}
-
-header{
-  background:var(--black);
-  color:white;
-  padding:14px 18px;
-  position:sticky;
-  top:0;
-  z-index:100;
-}
-
-.header-inner{
-  max-width:1100px;
-  margin:auto;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:15px;
-}
-
-.logo{
-  font-size:23px;
-  font-weight:bold;
-  color:var(--yellow);
-}
-
-.header-actions{
-  display:flex;
-  gap:8px;
-  align-items:center;
-}
-
-.btn{
-  border:0;
-  border-radius:10px;
-  padding:10px 15px;
-  font-weight:bold;
-}
-
-.btn-yellow{
-  background:var(--yellow);
-  color:#111;
-}
-
-.btn-dark{
-  background:#292929;
-  color:white;
-}
-
-.btn-red{
-  background:var(--red);
-  color:white;
-}
-
-.container{
-  max-width:1100px;
-  margin:auto;
-  padding:20px 15px;
-}
-
-.hero{
-  background:linear-gradient(135deg,#111,#292929);
-  color:white;
-  border-radius:20px;
-  padding:35px 25px;
-  margin-bottom:20px;
-}
-
-.hero h1{
-  margin:0 0 10px;
-  font-size:34px;
-}
-
-.hero p{
-  color:#ddd;
-  margin:0 0 20px;
-}
-
-.search{
-  width:100%;
-  padding:14px;
-  border:2px solid #ddd;
-  border-radius:12px;
-  font-size:16px;
-  outline:none;
-}
-
-.categories{
-  display:flex;
-  gap:8px;
-  overflow-x:auto;
-  padding:15px 0;
-}
-
-.category{
-  border:0;
-  background:white;
-  padding:10px 17px;
-  border-radius:20px;
-  white-space:nowrap;
-}
-
-.category.active{
-  background:var(--yellow);
-  font-weight:bold;
-}
-
-.products{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
-  gap:15px;
-}
-
-.product{
-  background:white;
-  border-radius:17px;
-  padding:18px;
-  box-shadow:0 3px 12px #0000000d;
-}
-
-.product-emoji{
-  font-size:55px;
-  text-align:center;
-  padding:12px;
-}
-
-.product h3{
-  margin:8px 0;
-}
-
-.product-category{
-  color:#777;
-  font-size:13px;
-}
-
-.price{
-  font-size:20px;
-  font-weight:bold;
-  margin:12px 0;
-}
-
-.add{
-  width:100%;
-  background:var(--yellow);
-  border:0;
-  padding:12px;
-  border-radius:10px;
-  font-weight:bold;
-}
-
-.empty{
-  text-align:center;
-  padding:40px;
-  color:#777;
-}
-
-.cart-bar{
-  position:fixed;
-  bottom:15px;
-  left:15px;
-  right:15px;
-  max-width:500px;
-  margin:auto;
-  background:var(--black);
-  color:white;
-  border-radius:15px;
-  padding:12px 15px;
-  display:none;
-  justify-content:space-between;
-  align-items:center;
-  z-index:90;
-  box-shadow:0 5px 25px #0005;
-}
-
-.modal{
-  position:fixed;
-  inset:0;
-  background:#0008;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:15px;
-  z-index:200;
-}
-
-.modal-box{
-  background:white;
-  width:100%;
-  max-width:500px;
-  max-height:90vh;
-  overflow:auto;
-  border-radius:18px;
-  padding:22px;
-  position:relative;
-}
-
-.close{
-  position:absolute;
-  top:10px;
-  left:10px;
-  border:0;
-  background:#eee;
-  width:35px;
-  height:35px;
-  border-radius:50%;
-  font-size:20px;
-}
-
-.form-group{
-  margin-bottom:13px;
-}
-
-.form-group label{
-  display:block;
-  margin-bottom:6px;
-  font-weight:bold;
-}
-
-.form-group input,
-.form-group textarea{
-  width:100%;
-  padding:12px;
-  border:1px solid #ddd;
-  border-radius:10px;
-  font-size:15px;
-  outline:none;
-}
-
-.form-group textarea{
-  min-height:90px;
-  resize:vertical;
-}
-
-.auth-tabs{
-  display:flex;
-  gap:5px;
-  background:#eee;
-  padding:4px;
-  border-radius:10px;
-  margin-bottom:20px;
-}
-
-.auth-tab{
-  flex:1;
-  border:0;
-  padding:10px;
-  border-radius:8px;
-  background:transparent;
-}
-
-.auth-tab.active{
-  background:white;
-  font-weight:bold;
-}
-
-.auth-form{
-  display:none;
-}
-
-.auth-form.active{
-  display:block;
-}
-
-.user-box{
-  display:none;
-  align-items:center;
-  gap:8px;
-}
-
-.user-name{
-  color:var(--yellow);
-  font-weight:bold;
-}
-
-.cart-item{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:12px 0;
-  border-bottom:1px solid #eee;
-}
-
-.cart-item-info{
-  flex:1;
-}
-
-.qty{
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-
-.qty button{
-  width:30px;
-  height:30px;
-  border:0;
-  border-radius:7px;
-  background:#eee;
-}
-
-.cart-total{
-  display:flex;
-  justify-content:space-between;
-  font-weight:bold;
-  font-size:18px;
-  padding:15px 0;
-}
-
-.message{
-  padding:12px;
-  border-radius:10px;
-  margin-bottom:12px;
-  display:none;
-}
-
-.message.error{
-  display:block;
-  background:#ffe5e5;
-  color:#b00000;
-}
-
-.message.success{
-  display:block;
-  background:#e2f8ed;
-  color:#08733e;
-}
-
-.orders-list{
-  margin-top:10px;
-}
-
-.order{
-  background:white;
-  border-radius:12px;
-  padding:15px;
-  margin-bottom:10px;
-}
-
-.status{
-  display:inline-block;
-  padding:5px 9px;
-  border-radius:15px;
-  background:#eee;
-  font-size:12px;
-  font-weight:bold;
-}
-
-/* MAP */
-
-#map{
-  width:100%;
-  height:300px;
-  border-radius:12px;
-  margin-top:10px;
-  overflow:hidden;
-}
-
-.location-actions{
-  display:flex;
-  gap:8px;
-  margin-top:10px;
-}
-
-.location-actions button{
-  flex:1;
-}
-
-.location-status{
-  margin-top:8px;
-  font-size:13px;
-  color:#666;
-}
-
-.location-status.success{
-  color:#08733e;
-  font-weight:bold;
-}
-
-.location-status.error{
-  color:#b00000;
-}
-
-footer{
-  margin-top:50px;
-  background:#111;
-  color:white;
-  text-align:center;
-  padding:25px;
-}
-
-@media(max-width:600px){
-
-  .hero h1{
-    font-size:27px;
-  }
-
-  .header-inner{
-    flex-wrap:wrap;
-  }
-
-  .user-name{
-    display:none;
-  }
-
-  .products{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-  .product{
-    padding:12px;
-  }
-
-  .product-emoji{
-    font-size:42px;
-  }
-
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Djalil Delivery</title>
+
+  <!-- Leaflet Map -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, Tahoma, sans-serif;
+      background: #f5f5f5;
+      color: #222;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font-family: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+    }
+
+    .header {
+      background: #111;
+      color: white;
+      padding: 16px 5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #ffd400;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: #ffd400;
+      color: #111;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+
+    .btn-dark {
+      background: #222;
+      color: white;
+    }
+
+    .btn-red {
+      background: #e53935;
+      color: white;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #111, #292929);
+      color: white;
+      padding: 60px 5%;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 42px;
+      margin-bottom: 12px;
+    }
+
+    .hero span {
+      color: #ffd400;
+    }
+
+    .hero p {
+      color: #ddd;
+      margin-bottom: 25px;
+    }
+
+    .search-box {
+      max-width: 650px;
+      margin: auto;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 15px;
+      border-radius: 12px;
+      border: none;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 30px auto;
+    }
+
+    .section-title {
+      margin-bottom: 20px;
+      font-size: 28px;
+    }
+
+    .categories {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      margin-bottom: 25px;
+    }
+
+    .category {
+      background: white;
+      padding: 10px 18px;
+      border-radius: 30px;
+      white-space: nowrap;
+      border: 1px solid #ddd;
+    }
+
+    .category.active {
+      background: #ffd400;
+      border-color: #ffd400;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .product {
+      background: white;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 5px 20px rgba(0,0,0,.07);
+      padding: 20px;
+    }
+
+    .product-image {
+      height: 130px;
+      background: #f3f3f3;
+      border-radius: 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 65px;
+      margin-bottom: 15px;
+    }
+
+    .product h3 {
+      margin-bottom: 8px;
+    }
+
+    .product-category {
+      color: #777;
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+
+    .product-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .price {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .add-btn {
+      background: #111;
+      color: white;
+      padding: 9px 13px;
+      border-radius: 9px;
+    }
+
+    .cart-floating {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: #ffd400;
+      color: #111;
+      padding: 15px 20px;
+      border-radius: 50px;
+      font-weight: bold;
+      z-index: 2000;
+      box-shadow: 0 5px 20px rgba(0,0,0,.2);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.65);
+      z-index: 3000;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .modal.active {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .modal-content {
+      background: white;
+      width: 100%;
+      max-width: 600px;
+      border-radius: 18px;
+      padding: 25px;
+      margin-top: 40px;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      left: 15px;
+      top: 15px;
+      background: #eee;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      font-size: 20px;
+    }
+
+    .modal-title {
+      font-size: 25px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: bold;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      outline: none;
+      font-size: 15px;
+    }
+
+    .form-group textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 5px;
+      background: #eee;
+      padding: 5px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      background: transparent;
+    }
+
+    .auth-tab.active {
+      background: #ffd400;
+      font-weight: bold;
+    }
+
+    .auth-form {
+      display: none;
+    }
+
+    .auth-form.active {
+      display: block;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .cart-item-info {
+      flex: 1;
+    }
+
+    .cart-item-name {
+      font-weight: bold;
+    }
+
+    .quantity {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .quantity button {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      background: #eee;
+    }
+
+    .cart-total {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 40px;
+      color: #777;
+    }
+
+    /* MAP */
+
+    #map {
+      height: 330px;
+      width: 100%;
+      border-radius: 15px;
+      margin-top: 10px;
+      border: 2px solid #eee;
+      overflow: hidden;
+    }
+
+    .location-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .location-status {
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 10px;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .coordinates {
+      color: #555;
+      direction: ltr;
+      text-align: left;
+      margin-top: 5px;
+      font-size: 12px;
+    }
+
+    .order-card {
+      background: #f8f8f8;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 12px;
+    }
+
+    .order-status {
+      display: inline-block;
+      background: #ffd400;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
+    .map-link {
+      display: inline-block;
+      margin-top: 10px;
+      background: #111;
+      color: white;
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+
+    .toast {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: #111;
+      color: white;
+      padding: 14px 18px;
+      border-radius: 10px;
+      z-index: 5000;
+      display: none;
+      max-width: 320px;
+    }
+
+    .toast.show {
+      display: block;
+    }
+
+    .user-name {
+      color: #ffd400;
+      font-weight: bold;
+    }
+
+    @media (max-width: 600px) {
+      .hero h1 {
+        font-size: 30px;
+      }
+
+      .header {
+        padding: 12px;
+      }
+
+      .logo {
+        font-size: 20px;
+      }
+
+      .container {
+        width: 94%;
+      }
+
+      .modal-content {
+        margin-top: 15px;
+        padding: 20px;
+      }
+
+      #map {
+        height: 300px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<header>
-
-  <div class="header-inner">
-
-    <div class="logo">
-      🍔 Djalil Delivery
-    </div>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo">Djalil Delivery</div>
 
     <div class="header-actions">
+      <span id="userDisplay"></span>
 
       <button
-        id="loginBtn"
-        class="btn btn-yellow"
-        onclick="openAuth()">
+        id="authButton"
+        class="btn"
+        onclick="openAuthModal()"
+      >
         تسجيل الدخول
       </button>
 
-      <div id="userBox" class="user-box">
+      <button
+        id="ordersButton"
+        class="btn btn-dark"
+        onclick="openOrdersModal()"
+        style="display:none"
+      >
+        طلباتي
+      </button>
 
-        <span id="userName" class="user-name"></span>
-
-        <button
-          class="btn btn-dark"
-          onclick="openOrders()">
-          طلباتي
-        </button>
-
-        <button
-          class="btn btn-red"
-          onclick="logout()">
-          خروج
-        </button>
-
-      </div>
-
+      <button
+        id="logoutButton"
+        class="btn btn-red"
+        onclick="logout()"
+        style="display:none"
+      >
+        خروج
+      </button>
     </div>
+  </header>
 
-  </div>
-
-</header>
-
-
-<main class="container">
-
+  <!-- HERO -->
   <section class="hero">
+    <h1>مرحبا بك في <span>Djalil Delivery</span></h1>
+    <p>اطلب أكلك المفضل وخليه يوصلك حتى لباب الدار 🍔</p>
 
-    <h1>وش تحب تاكل اليوم؟ 🍔</h1>
-
-    <p>
-      اطلب أكلك المفضل وخليه يوصلك حتى لباب دارك.
-    </p>
-
-    <input
-      id="search"
-      class="search"
-      type="search"
-      placeholder="ابحث عن برغر، بيتزا، كريب..."
-      oninput="renderProducts()">
-
+    <div class="search-box">
+      <input
+        id="searchInput"
+        type="text"
+        placeholder="ابحث عن وجبة..."
+        oninput="renderProducts()"
+      />
+    </div>
   </section>
 
-  <div id="categories" class="categories"></div>
+  <!-- PRODUCTS -->
+  <main class="container">
 
-  <section>
+    <h2 class="section-title">اختار واش تحب 🍴</h2>
+
+    <div class="categories">
+      <button
+        class="category active"
+        data-category="all"
+        onclick="setCategory('all', this)"
+      >
+        الكل
+      </button>
+
+      <button
+        class="category"
+        data-category="burger"
+        onclick="setCategory('burger', this)"
+      >
+        🍔 برغر
+      </button>
+
+      <button
+        class="category"
+        data-category="pizza"
+        onclick="setCategory('pizza', this)"
+      >
+        🍕 بيتزا
+      </button>
+
+      <button
+        class="category"
+        data-category="crepe"
+        onclick="setCategory('crepe', this)"
+      >
+        🥞 كريب
+      </button>
+
+      <button
+        class="category"
+        data-category="tacos"
+        onclick="setCategory('tacos', this)"
+      >
+        🌯 تاكوس
+      </button>
+
+      <button
+        class="category"
+        data-category="chicken"
+        onclick="setCategory('chicken', this)"
+      >
+        🍗 دجاج
+      </button>
+    </div>
 
     <div
       id="products"
-      class="products">
-    </div>
+      class="products"
+    ></div>
 
-  </section>
+  </main>
 
-</main>
-
-
-<div
-  id="cartBar"
-  class="cart-bar">
-
-  <div>
-    🛒 السلة:
-    <strong id="cartCount">0</strong>
-    منتج
-  </div>
-
+  <!-- CART BUTTON -->
   <button
-    class="btn btn-yellow"
-    onclick="openCart()">
-    عرض السلة
+    class="cart-floating"
+    onclick="openCartModal()"
+  >
+    🛒 السلة
+    <span id="cartCount">0</span>
   </button>
 
-</div>
-
-
-<footer>
-
-  <strong>Djalil Delivery</strong>
-
-  <br>
-
-  خدمة توصيل الطعام
-
-</footer>
-
-
-<!-- AUTH MODAL -->
-
-<div id="authModal" class="modal">
-
-  <div class="modal-box">
-
-    <button
-      class="close"
-      onclick="closeModal('authModal')">
-      ×
-    </button>
-
-    <h2>مرحبا 👋</h2>
-
-    <div
-      id="authMessage"
-      class="message">
-    </div>
-
-    <div class="auth-tabs">
+  <!-- AUTH MODAL -->
+  <div
+    id="authModal"
+    class="modal"
+    onclick="modalBackgroundClose(event, 'authModal')"
+  >
+    <div class="modal-content">
 
       <button
-        id="loginTab"
-        class="auth-tab active"
-        onclick="showAuthForm('login')">
-        تسجيل الدخول
+        class="modal-close"
+        onclick="closeModal('authModal')"
+      >
+        ×
       </button>
 
-      <button
-        id="registerTab"
-        class="auth-tab"
-        onclick="showAuthForm('register')">
-        إنشاء حساب
-      </button>
+      <h2 class="modal-title">الحساب</h2>
+
+      <div class="auth-tabs">
+
+        <button
+          id="loginTab"
+          class="auth-tab active"
+          onclick="showAuthForm('login')"
+        >
+          تسجيل الدخول
+        </button>
+
+        <button
+          id="registerTab"
+          class="auth-tab"
+          onclick="showAuthForm('register')"
+        >
+          إنشاء حساب
+        </button>
+
+      </div>
+
+      <!-- LOGIN -->
+      <form
+        id="loginForm"
+        class="auth-form active"
+        onsubmit="login(event)"
+      >
+
+        <div class="form-group">
+          <label>رقم الهاتف</label>
+          <input
+            id="loginPhone"
+            type="tel"
+            placeholder="05xxxxxxxx"
+            autocomplete="tel"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>كلمة السر</label>
+          <input
+            id="loginPassword"
+            type="password"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+
+        <button
+          class="btn"
+          type="submit"
+          style="width:100%"
+        >
+          دخول
+        </button>
+
+      </form>
+
+      <!-- REGISTER -->
+      <form
+        id="registerForm"
+        class="auth-form"
+        onsubmit="register(event)"
+      >
+
+        <div class="form-group">
+          <label>الاسم</label>
+          <input
+            id="registerName"
+            type="text"
+            autocomplete="name"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>رقم الهاتف</label>
+          <input
+            id="registerPhone"
+            type="tel"
+            placeholder="05xxxxxxxx"
+            autocomplete="tel"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>كلمة السر</label>
+          <input
+            id="registerPassword"
+            type="password"
+            autocomplete="new-password"
+            minlength="8"
+            required
+          />
+        </div>
+
+        <button
+          class="btn"
+          type="submit"
+          style="width:100%"
+        >
+          إنشاء الحساب
+        </button>
+
+      </form>
 
     </div>
+  </div>
 
+  <!-- CART MODAL -->
+  <div
+    id="cartModal"
+    class="modal"
+    onclick="modalBackgroundClose(event, 'cartModal')"
+  >
+    <div class="modal-content">
 
-    <form
-      id="loginForm"
-      class="auth-form active"
-      onsubmit="login(event)">
+      <button
+        class="modal-close"
+        onclick="closeModal('cartModal')"
+      >
+        ×
+      </button>
+
+      <h2 class="modal-title">🛒 السلة</h2>
+
+      <div id="cartItems"></div>
+
+      <div
+        id="cartSummary"
+        style="display:none"
+      >
+
+        <div class="cart-total">
+          <span>المجموع</span>
+          <span id="cartTotal">0 دج</span>
+        </div>
+
+        <button
+          class="btn"
+          onclick="startCheckout()"
+          style="width:100%;margin-top:20px"
+        >
+          متابعة الطلب
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CHECKOUT MODAL -->
+  <div
+    id="checkoutModal"
+    class="modal"
+    onclick="modalBackgroundClose(event, 'checkoutModal')"
+  >
+    <div class="modal-content">
+
+      <button
+        class="modal-close"
+        onclick="closeModal('checkoutModal')"
+      >
+        ×
+      </button>
+
+      <h2 class="modal-title">
+        📦 تأكيد الطلب
+      </h2>
 
       <div class="form-group">
-
         <label>رقم الهاتف</label>
 
         <input
-          id="loginPhone"
-          name="phone"
+          id="orderPhone"
           type="tel"
+          placeholder="05xxxxxxxx"
           autocomplete="tel"
-          placeholder="0550000000"
-          required>
-
+        />
       </div>
 
       <div class="form-group">
+        <label>العنوان بالتفصيل</label>
 
-        <label>كلمة السر</label>
-
-        <input
-          id="loginPassword"
-          name="password"
-          type="password"
-          autocomplete="current-password"
-          placeholder="كلمة السر"
-          required>
-
+        <textarea
+          id="address"
+          placeholder="مثال: الجزائر، باب الزوار، حي..."
+        ></textarea>
       </div>
-
-      <button
-        class="btn btn-yellow"
-        style="width:100%"
-        type="submit">
-        دخول
-      </button>
-
-    </form>
-
-
-    <form
-      id="registerForm"
-      class="auth-form"
-      onsubmit="register(event)">
-
-      <div class="form-group">
-
-        <label>الاسم</label>
-
-        <input
-          id="registerName"
-          name="name"
-          type="text"
-          autocomplete="name"
-          placeholder="اسمك"
-          required>
-
-      </div>
-
-      <div class="form-group">
-
-        <label>رقم الهاتف</label>
-
-        <input
-          id="registerPhone"
-          name="phone"
-          type="tel"
-          autocomplete="tel"
-          placeholder="0550000000"
-          required>
-
-      </div>
-
-      <div class="form-group">
-
-        <label>كلمة السر</label>
-
-        <input
-          id="registerPassword"
-          name="password"
-          type="password"
-          autocomplete="new-password"
-          placeholder="8 أحرف على الأقل"
-          minlength="8"
-          required>
-
-      </div>
-
-      <button
-        class="btn btn-yellow"
-        style="width:100%"
-        type="submit">
-        إنشاء الحساب
-      </button>
-
-    </form>
-
-  </div>
-
-</div>
-
-
-<!-- CART MODAL -->
-
-<div id="cartModal" class="modal">
-
-  <div class="modal-box">
-
-    <button
-      class="close"
-      onclick="closeModal('cartModal')">
-      ×
-    </button>
-
-    <h2>🛒 السلة</h2>
-
-    <div id="cartItems"></div>
-
-    <div class="cart-total">
-
-      <span>المجموع</span>
-
-      <span id="cartTotal">
-        0 دج
-      </span>
-
-    </div>
-
-    <button
-      class="btn btn-yellow"
-      style="width:100%"
-      onclick="checkout()">
-      إتمام الطلب
-    </button>
-
-  </div>
-
-</div>
-
-
-<!-- CHECKOUT MODAL -->
-
-<div id="checkoutModal" class="modal">
-
-  <div class="modal-box">
-
-    <button
-      class="close"
-      onclick="closeModal('checkoutModal')">
-      ×
-    </button>
-
-    <h2>📦 معلومات التوصيل</h2>
-
-    <div
-      id="checkoutMessage"
-      class="message">
-    </div>
-
-
-    <form onsubmit="placeOrder(event)">
-
 
       <!-- LOCATION -->
-
       <div class="form-group">
 
-        <label>📍 موقع التوصيل</label>
+        <label>
+          📍 موقع التوصيل
+        </label>
+
+        <p style="font-size:13px;color:#777;margin-bottom:8px">
+          حدد مكان التوصيل على الخريطة، أو اضغط على "تحديد موقعي".
+        </p>
 
         <div id="map"></div>
 
@@ -783,1634 +814,1429 @@ footer{
 
           <button
             type="button"
-            class="btn btn-yellow"
-            onclick="getMyLocation()">
+            class="btn"
+            onclick="locateUser()"
+          >
             📍 تحديد موقعي
           </button>
 
           <button
             type="button"
             class="btn btn-dark"
-            onclick="resetLocation()">
-            🔄 إعادة
+            onclick="resetMapLocation()"
+          >
+            🔄 إعادة تحديد
           </button>
 
         </div>
 
         <div
           id="locationStatus"
-          class="location-status">
-          اضغط على «تحديد موقعي» لاختيار مكان التوصيل.
+          class="location-status"
+        >
+          ⚠️ يجب تحديد موقع التوصيل.
         </div>
 
-      </div>
-
-
-      <div class="form-group">
-
-        <label>العنوان بالتفصيل</label>
-
-        <textarea
-          id="address"
-          placeholder="مثال: حي كذا، شارع كذا، رقم المنزل..."
-          required></textarea>
+        <div
+          id="coordinates"
+          class="coordinates"
+        ></div>
 
       </div>
 
-
-      <div class="form-group">
-
-        <label>رقم الهاتف</label>
-
-        <input
-          id="orderPhone"
-          type="tel"
-          placeholder="0550000000"
-          required>
-
+      <div
+        style="
+          background:#fff8d6;
+          padding:12px;
+          border-radius:10px;
+          margin-bottom:15px;
+        "
+      >
+        🚚 مصاريف التوصيل:
+        <strong>300 دج</strong>
       </div>
 
+      <div
+        class="cart-total"
+        style="margin-bottom:15px"
+      >
+        <span>المجموع النهائي</span>
+        <span id="checkoutTotal">0 دج</span>
+      </div>
 
       <button
-        class="btn btn-yellow"
+        id="confirmOrderButton"
+        class="btn"
+        onclick="confirmOrder()"
         style="width:100%"
-        type="submit">
-        تأكيد الطلب
+      >
+        ✅ تأكيد الطلب
       </button>
 
-    </form>
-
+    </div>
   </div>
 
-</div>
-
-
-<!-- ORDERS MODAL -->
-
-<div id="ordersModal" class="modal">
-
-  <div class="modal-box">
-
-    <button
-      class="close"
-      onclick="closeModal('ordersModal')">
-      ×
-    </button>
-
-    <h2>📦 طلباتي</h2>
-
-    <div id="ordersList"></div>
-
-  </div>
-
-</div>
-
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script>
-
-const API = "/api";
-
-let products = [];
-let cart = [];
-let selectedCategory = "الكل";
-let currentUser = null;
-
-let map = null;
-let locationMarker = null;
-let selectedLatitude = null;
-let selectedLongitude = null;
-
-
-/* =========================
-   HELPERS
-========================= */
-
-function escapeHTML(value){
-
-  return String(value ?? "")
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
-
-}
-
-
-function money(value){
-
-  return Number(value || 0)
-    .toLocaleString("fr-DZ") + " دج";
-
-}
-
-
-function openModal(id){
-
-  const modal =
-    document.getElementById(id);
-
-  if(modal){
-    modal.style.display = "flex";
-  }
-
-}
-
-
-function closeModal(id){
-
-  const modal =
-    document.getElementById(id);
-
-  if(modal){
-    modal.style.display = "none";
-  }
-
-}
-
-
-function clearAuthFields(){
-
-  const fields = [
-    "loginPhone",
-    "loginPassword",
-    "registerName",
-    "registerPhone",
-    "registerPassword"
-  ];
-
-  fields.forEach((id)=>{
-
-    const element =
-      document.getElementById(id);
-
-    if(element){
-      element.value = "";
-    }
-
-  });
-
-}
-
-
-/* =========================
-   AUTH
-========================= */
-
-function openAuth(){
-
-  showAuthForm("login");
-
-  clearMessage("authMessage");
-
-  openModal("authModal");
-
-}
-
-
-function showAuthForm(type){
-
-  const loginForm =
-    document.getElementById("loginForm");
-
-  const registerForm =
-    document.getElementById("registerForm");
-
-  const loginTab =
-    document.getElementById("loginTab");
-
-  const registerTab =
-    document.getElementById("registerTab");
-
-
-  if(type === "login"){
-
-    loginForm.classList.add("active");
-    registerForm.classList.remove("active");
-
-    loginTab.classList.add("active");
-    registerTab.classList.remove("active");
-
-  }else{
-
-    loginForm.classList.remove("active");
-    registerForm.classList.add("active");
-
-    loginTab.classList.remove("active");
-    registerTab.classList.add("active");
-
-  }
-
-}
-
-
-function showMessage(id,text,type="error"){
-
-  const element =
-    document.getElementById(id);
-
-  if(!element) return;
-
-  element.textContent = text;
-
-  element.className =
-    "message " + type;
-
-}
-
-
-function clearMessage(id){
-
-  const element =
-    document.getElementById(id);
-
-  if(!element) return;
-
-  element.textContent = "";
-
-  element.className = "message";
-
-}
-
-
-async function login(event){
-
-  event.preventDefault();
-
-  clearMessage("authMessage");
-
-  const phone =
-    document.getElementById("loginPhone")
-      .value.trim();
-
-  const password =
-    document.getElementById("loginPassword")
-      .value;
-
-
-  try{
-
-    const response =
-      await fetch(
-        API + "/login",
-        {
-          method:"POST",
-          headers:{
-            "Content-Type":"application/json"
-          },
-          body:JSON.stringify({
-            phone,
-            password
-          })
-        }
-      );
-
-
-    const data =
-      await response.json();
-
-
-    if(!response.ok){
-
-      showMessage(
-        "authMessage",
-        data.error || "فشل تسجيل الدخول."
-      );
-
-      return;
-
-    }
-
-
-    localStorage.setItem(
-      "token",
-      data.token
-    );
-
-
-    currentUser = data.user;
-
-    clearAuthFields();
-
-    closeModal("authModal");
-
-    updateUserUI();
-
-    await loadOrders();
-
-    alert("مرحبا " + data.user.name);
-
-  }catch(error){
-
-    showMessage(
-      "authMessage",
-      "تعذر الاتصال بالخادم."
-    );
-
-  }
-
-}
-
-
-async function register(event){
-
-  event.preventDefault();
-
-  clearMessage("authMessage");
-
-
-  const name =
-    document.getElementById("registerName")
-      .value.trim();
-
-  const phone =
-    document.getElementById("registerPhone")
-      .value.trim();
-
-  const password =
-    document.getElementById("registerPassword")
-      .value;
-
-
-  try{
-
-    const response =
-      await fetch(
-        API + "/register",
-        {
-          method:"POST",
-          headers:{
-            "Content-Type":"application/json"
-          },
-          body:JSON.stringify({
-            name,
-            phone,
-            password
-          })
-        }
-      );
-
-
-    const data =
-      await response.json();
-
-
-    if(!response.ok){
-
-      showMessage(
-        "authMessage",
-        data.error || "فشل إنشاء الحساب."
-      );
-
-      return;
-
-    }
-
-
-    localStorage.setItem(
-      "token",
-      data.token
-    );
-
-
-    currentUser = data.user;
-
-    clearAuthFields();
-
-    closeModal("authModal");
-
-    updateUserUI();
-
-    alert("تم إنشاء الحساب بنجاح 🎉");
-
-  }catch(error){
-
-    showMessage(
-      "authMessage",
-      "تعذر الاتصال بالخادم."
-    );
-
-  }
-
-}
-
-
-/* =========================
-   LOGOUT
-========================= */
-
-function logout(){
-
-  localStorage.removeItem("token");
-
-  currentUser = null;
-
-  cart = [];
-
-  updateCartUI();
-
-  clearAuthFields();
-
-  updateUserUI();
-
-  closeModal("cartModal");
-  closeModal("checkoutModal");
-  closeModal("ordersModal");
-  closeModal("authModal");
-
-  window.location.reload();
-
-}
-
-
-/* =========================
-   SESSION
-========================= */
-
-async function checkSession(){
-
-  const token =
-    localStorage.getItem("token");
-
-
-  if(!token){
-
-    currentUser = null;
-
-    updateUserUI();
-
-    return;
-
-  }
-
-
-  try{
-
-    const response =
-      await fetch(
-        API + "/me",
-        {
-          headers:{
-            Authorization:
-              "Bearer " + token
-          }
-        }
-      );
-
-
-    if(!response.ok){
-
-      localStorage.removeItem("token");
-
-      currentUser = null;
-
-      updateUserUI();
-
-      return;
-
-    }
-
-
-    const data =
-      await response.json();
-
-    currentUser = data.user;
-
-    updateUserUI();
-
-  }catch{
-
-    localStorage.removeItem("token");
-
-    currentUser = null;
-
-    updateUserUI();
-
-  }
-
-}
-
-
-function updateUserUI(){
-
-  const loginBtn =
-    document.getElementById("loginBtn");
-
-  const userBox =
-    document.getElementById("userBox");
-
-  const userName =
-    document.getElementById("userName");
-
-
-  if(currentUser){
-
-    loginBtn.style.display = "none";
-
-    userBox.style.display = "flex";
-
-    userName.textContent =
-      currentUser.name;
-
-  }else{
-
-    loginBtn.style.display = "block";
-
-    userBox.style.display = "none";
-
-    userName.textContent = "";
-
-  }
-
-}
-
-
-/* =========================
-   PRODUCTS
-========================= */
-
-async function loadProducts(){
-
-  const container =
-    document.getElementById("products");
-
-
-  try{
-
-    const response =
-      await fetch(API + "/products");
-
-    products =
-      await response.json();
-
-    renderCategories();
-
-    renderProducts();
-
-  }catch{
-
-    container.innerHTML =
-      `<div class="empty">
-        تعذر تحميل المنتجات.
-      </div>`;
-
-  }
-
-}
-
-
-function renderCategories(){
-
-  const categories =
-    ["الكل"];
-
-
-  products.forEach((product)=>{
-
-    if(
-      product.category &&
-      !categories.includes(product.category)
-    ){
-
-      categories.push(product.category);
-
-    }
-
-  });
-
-
-  const container =
-    document.getElementById("categories");
-
-
-  container.innerHTML =
-    categories.map((category)=>`
+  <!-- ORDERS MODAL -->
+  <div
+    id="ordersModal"
+    class="modal"
+    onclick="modalBackgroundClose(event, 'ordersModal')"
+  >
+    <div class="modal-content">
 
       <button
-        class="category ${
-          selectedCategory === category
-            ? "active"
-            : ""
-        }"
-        onclick="selectCategory('${escapeHTML(category)}')">
-
-        ${escapeHTML(category)}
-
+        class="modal-close"
+        onclick="closeModal('ordersModal')"
+      >
+        ×
       </button>
 
-    `).join("");
+      <h2 class="modal-title">
+        📦 طلباتي
+      </h2>
 
-}
+      <div id="ordersList"></div>
 
+    </div>
+  </div>
 
-function selectCategory(category){
+  <!-- TOAST -->
+  <div
+    id="toast"
+    class="toast"
+  ></div>
 
-  selectedCategory = category;
+  <!-- LEAFLET -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  renderCategories();
+  <script>
+    /* =========================
+       GLOBAL VARIABLES
+    ========================= */
 
-  renderProducts();
+    let products = [];
+    let cart = [];
+    let currentUser = null;
+    let selectedCategory = "all";
 
-}
+    let map = null;
+    let marker = null;
 
+    let selectedLatitude = null;
+    let selectedLongitude = null;
 
-function renderProducts(){
+    const DELIVERY_FEE = 300;
 
-  const container =
-    document.getElementById("products");
+    /* =========================
+       API
+    ========================= */
 
-  const search =
-    document.getElementById("search")
-      .value
-      .trim()
-      .toLowerCase();
+    async function api(url, options = {}) {
+      const headers = {
+        "Content-Type": "application/json",
+        ...(options.headers || {})
+      };
 
+      const token = localStorage.getItem("token");
 
-  const filtered =
-    products.filter((product)=>{
-
-      const categoryMatch =
-        selectedCategory === "الكل" ||
-        product.category === selectedCategory;
-
-      const searchMatch =
-        !search ||
-        product.name
-          .toLowerCase()
-          .includes(search) ||
-        String(product.category || "")
-          .toLowerCase()
-          .includes(search);
-
-      return categoryMatch && searchMatch;
-
-    });
-
-
-  if(!filtered.length){
-
-    container.innerHTML =
-      `<div class="empty">
-        ما لقيناش المنتج لي راك تقلب عليه.
-      </div>`;
-
-    return;
-
-  }
-
-
-  container.innerHTML =
-    filtered.map((product)=>`
-
-      <article class="product">
-
-        <div class="product-emoji">
-          ${escapeHTML(product.emoji || "🍽️")}
-        </div>
-
-        <div class="product-category">
-          ${escapeHTML(product.category || "")}
-        </div>
-
-        <h3>
-          ${escapeHTML(product.name)}
-        </h3>
-
-        <div class="price">
-          ${money(product.price)}
-        </div>
-
-        <button
-          class="add"
-          onclick="addToCart(${product.id})">
-
-          + أضف للسلة
-
-        </button>
-
-      </article>
-
-    `).join("");
-
-}
-
-
-/* =========================
-   CART
-========================= */
-
-function addToCart(productId){
-
-  const product =
-    products.find(
-      (item)=>item.id === productId
-    );
-
-
-  if(!product) return;
-
-
-  const existing =
-    cart.find(
-      (item)=>item.id === productId
-    );
-
-
-  if(existing){
-
-    if(existing.quantity < 20){
-      existing.quantity++;
-    }
-
-  }else{
-
-    cart.push({
-      id:product.id,
-      name:product.name,
-      price:product.price,
-      emoji:product.emoji,
-      quantity:1
-    });
-
-  }
-
-
-  updateCartUI();
-
-}
-
-
-function changeQuantity(productId,change){
-
-  const item =
-    cart.find(
-      (product)=>product.id === productId
-    );
-
-
-  if(!item) return;
-
-
-  item.quantity += change;
-
-
-  if(item.quantity <= 0){
-
-    cart =
-      cart.filter(
-        (product)=>
-          product.id !== productId
-      );
-
-  }
-
-
-  if(item.quantity > 20){
-    item.quantity = 20;
-  }
-
-
-  updateCartUI();
-
-  renderCart();
-
-}
-
-
-function cartTotal(){
-
-  return cart.reduce(
-    (total,item)=>
-      total + item.price * item.quantity,
-    0
-  );
-
-}
-
-
-function updateCartUI(){
-
-  const count =
-    cart.reduce(
-      (total,item)=>
-        total + item.quantity,
-      0
-    );
-
-
-  const cartBar =
-    document.getElementById("cartBar");
-
-  const cartCount =
-    document.getElementById("cartCount");
-
-
-  cartCount.textContent = count;
-
-  cartBar.style.display =
-    count > 0 ? "flex" : "none";
-
-}
-
-
-function openCart(){
-
-  renderCart();
-
-  openModal("cartModal");
-
-}
-
-
-function renderCart(){
-
-  const container =
-    document.getElementById("cartItems");
-
-  const total =
-    document.getElementById("cartTotal");
-
-
-  if(!cart.length){
-
-    container.innerHTML =
-      `<div class="empty">
-        السلة فارغة.
-      </div>`;
-
-    total.textContent = "0 دج";
-
-    return;
-
-  }
-
-
-  container.innerHTML =
-    cart.map((item)=>`
-
-      <div class="cart-item">
-
-        <div style="font-size:35px">
-          ${escapeHTML(item.emoji || "🍽️")}
-        </div>
-
-        <div class="cart-item-info">
-
-          <strong>
-            ${escapeHTML(item.name)}
-          </strong>
-
-          <br>
-
-          ${money(item.price)}
-
-        </div>
-
-        <div class="qty">
-
-          <button
-            onclick="changeQuantity(${item.id},-1)">
-            −
-          </button>
-
-          <strong>
-            ${item.quantity}
-          </strong>
-
-          <button
-            onclick="changeQuantity(${item.id},1)">
-            +
-          </button>
-
-        </div>
-
-      </div>
-
-    `).join("");
-
-
-  total.textContent =
-    money(cartTotal());
-
-}
-
-
-/* =========================
-   LOCATION / MAP
-========================= */
-
-function initMap(){
-
-  if(map){
-
-    setTimeout(()=>{
-      map.invalidateSize();
-    },200);
-
-    return;
-
-  }
-
-
-  const defaultLat = 36.7538;
-  const defaultLng = 3.0588;
-
-
-  map =
-    L.map("map").setView(
-      [defaultLat,defaultLng],
-      12
-    );
-
-
-  L.tileLayer(
-    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    {
-      maxZoom:19,
-      attribution:"© OpenStreetMap"
-    }
-  ).addTo(map);
-
-
-  setTimeout(()=>{
-    map.invalidateSize();
-  },300);
-
-}
-
-
-function getMyLocation(){
-
-  const status =
-    document.getElementById(
-      "locationStatus"
-    );
-
-
-  if(!navigator.geolocation){
-
-    status.textContent =
-      "المتصفح لا يدعم تحديد الموقع.";
-
-    status.className =
-      "location-status error";
-
-    return;
-
-  }
-
-
-  status.textContent =
-    "جاري تحديد موقعك... 📍";
-
-  status.className =
-    "location-status";
-
-
-  navigator.geolocation.getCurrentPosition(
-
-    function(position){
-
-      const latitude =
-        position.coords.latitude;
-
-      const longitude =
-        position.coords.longitude;
-
-
-      selectedLatitude =
-        latitude;
-
-      selectedLongitude =
-        longitude;
-
-
-      if(!map){
-        initMap();
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
       }
 
+      const response = await fetch(url, {
+        ...options,
+        headers
+      });
 
-      map.setView(
-        [latitude,longitude],
-        17
-      );
+      let data = {};
 
+      try {
+        data = await response.json();
+      } catch {
+        data = {};
+      }
 
-      if(locationMarker){
+      if (!response.ok) {
+        throw new Error(
+          data.error || "حدث خطأ."
+        );
+      }
 
-        locationMarker.setLatLng([
-          latitude,
-          longitude
-        ]);
+      return data;
+    }
 
-      }else{
+    /* =========================
+       TOAST
+    ========================= */
 
-        locationMarker =
-          L.marker(
-            [latitude,longitude],
-            {
-              draggable:true
-            }
-          ).addTo(map);
+    function showToast(message) {
+      const toast =
+        document.getElementById("toast");
 
+      toast.textContent = message;
+      toast.classList.add("show");
 
-        locationMarker
-          .bindPopup(
-            "📍 موقع التوصيل"
-          )
-          .openPopup();
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 3000);
+    }
 
+    /* =========================
+       HTML ESCAPE
+    ========================= */
 
-        locationMarker.on(
-          "dragend",
-          function(event){
+    function escapeHTML(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
 
-            const position =
-              event.target.getLatLng();
+    /* =========================
+       MODALS
+    ========================= */
 
+    function openModal(id) {
+      document
+        .getElementById(id)
+        .classList.add("active");
+    }
 
-            selectedLatitude =
-              position.lat;
+    function closeModal(id) {
+      document
+        .getElementById(id)
+        .classList.remove("active");
+    }
 
-            selectedLongitude =
-              position.lng;
+    function modalBackgroundClose(
+      event,
+      id
+    ) {
+      if (event.target.id === id) {
+        closeModal(id);
+      }
+    }
 
+    /* =========================
+       AUTH UI
+    ========================= */
 
-            updateLocationStatus();
+    function openAuthModal() {
+      clearAuthFields();
+      showAuthForm("login");
+      openModal("authModal");
+    }
 
+    function showAuthForm(type) {
+      const loginForm =
+        document.getElementById("loginForm");
+
+      const registerForm =
+        document.getElementById("registerForm");
+
+      const loginTab =
+        document.getElementById("loginTab");
+
+      const registerTab =
+        document.getElementById("registerTab");
+
+      if (type === "login") {
+        loginForm.classList.add("active");
+        registerForm.classList.remove("active");
+
+        loginTab.classList.add("active");
+        registerTab.classList.remove("active");
+      } else {
+        loginForm.classList.remove("active");
+        registerForm.classList.add("active");
+
+        loginTab.classList.remove("active");
+        registerTab.classList.add("active");
+      }
+    }
+
+    function clearAuthFields() {
+      document.getElementById(
+        "loginPhone"
+      ).value = "";
+
+      document.getElementById(
+        "loginPassword"
+      ).value = "";
+
+      document.getElementById(
+        "registerName"
+      ).value = "";
+
+      document.getElementById(
+        "registerPhone"
+      ).value = "";
+
+      document.getElementById(
+        "registerPassword"
+      ).value = "";
+    }
+
+    /* =========================
+       REGISTER
+    ========================= */
+
+    async function register(event) {
+      event.preventDefault();
+
+      const name =
+        document.getElementById(
+          "registerName"
+        ).value.trim();
+
+      const phone =
+        document.getElementById(
+          "registerPhone"
+        ).value.trim();
+
+      const password =
+        document.getElementById(
+          "registerPassword"
+        ).value;
+
+      try {
+        const data = await api(
+          "/api/register",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              name,
+              phone,
+              password
+            })
           }
         );
 
+        localStorage.setItem(
+          "token",
+          data.token
+        );
+
+        currentUser = data.user;
+
+        clearAuthFields();
+        closeModal("authModal");
+        updateUserUI();
+
+        showToast(
+          "تم إنشاء الحساب بنجاح ✅"
+        );
+      } catch (error) {
+        showToast(error.message);
       }
-
-
-      updateLocationStatus();
-
-    },
-
-
-    function(error){
-
-      let message =
-        "تعذر تحديد موقعك.";
-
-
-      if(error.code === 1){
-
-        message =
-          "لازم تسمح للموقع بالوصول إلى موقعك من إعدادات المتصفح.";
-
-      }
-
-
-      if(error.code === 2){
-
-        message =
-          "تعذر الحصول على الموقع حالياً.";
-
-      }
-
-
-      if(error.code === 3){
-
-        message =
-          "انتهت مهلة تحديد الموقع. حاول مرة أخرى.";
-
-      }
-
-
-      status.textContent =
-        message;
-
-      status.className =
-        "location-status error";
-
-    },
-
-
-    {
-      enableHighAccuracy:true,
-      timeout:15000,
-      maximumAge:0
     }
 
-  );
+    /* =========================
+       LOGIN
+    ========================= */
+
+    async function login(event) {
+      event.preventDefault();
+
+      const phone =
+        document.getElementById(
+          "loginPhone"
+        ).value.trim();
+
+      const password =
+        document.getElementById(
+          "loginPassword"
+        ).value;
+
+      try {
+        const data = await api(
+          "/api/login",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              phone,
+              password
+            })
+          }
+        );
+
+        localStorage.setItem(
+          "token",
+          data.token
+        );
+
+        currentUser = data.user;
+
+        clearAuthFields();
+        closeModal("authModal");
+        updateUserUI();
+
+        showToast(
+          "مرحبا " +
+          currentUser.name +
+          " 👋"
+        );
+      } catch (error) {
+        showToast(error.message);
+      }
+    }
+
+    /* =========================
+       SESSION
+    ========================= */
+
+    async function checkSession() {
+      const token =
+        localStorage.getItem("token");
+
+      if (!token) {
+        currentUser = null;
+        updateUserUI();
+        return;
+      }
+
+      try {
+        const data =
+          await api("/api/me");
+
+        currentUser = data.user;
+        updateUserUI();
+      } catch {
+        localStorage.removeItem("token");
+        currentUser = null;
+        updateUserUI();
+      }
+    }
+
+    function updateUserUI() {
+      const authButton =
+        document.getElementById(
+          "authButton"
+        );
+
+      const logoutButton =
+        document.getElementById(
+          "logoutButton"
+        );
+
+      const ordersButton =
+        document.getElementById(
+          "ordersButton"
+        );
+
+      const userDisplay =
+        document.getElementById(
+          "userDisplay"
+        );
+
+      if (currentUser) {
+        authButton.style.display =
+          "none";
 
-}
+        logoutButton.style.display =
+          "block";
 
+        ordersButton.style.display =
+          "block";
 
-function updateLocationStatus(){
+        userDisplay.innerHTML =
+          `<span class="user-name">
+            ${escapeHTML(currentUser.name)}
+          </span>`;
+      } else {
+        authButton.style.display =
+          "block";
 
-  const status =
-    document.getElementById(
-      "locationStatus"
-    );
+        logoutButton.style.display =
+          "none";
 
+        ordersButton.style.display =
+          "none";
 
-  if(
-    selectedLatitude === null ||
-    selectedLongitude === null
-  ){
+        userDisplay.innerHTML = "";
+      }
+    }
 
-    return;
+    /* =========================
+       LOGOUT
+    ========================= */
 
-  }
-
-
-  status.textContent =
-    "تم تحديد موقع التوصيل ✅";
-
-  status.className =
-    "location-status success";
-
-}
-
-
-function resetLocation(){
-
-  selectedLatitude = null;
-  selectedLongitude = null;
-
-
-  if(locationMarker && map){
-
-    map.removeLayer(
-      locationMarker
-    );
-
-    locationMarker = null;
-
-  }
-
-
-  if(map){
-
-    map.setView(
-      [36.7538,3.0588],
-      12
-    );
-
-  }
-
-
-  const status =
-    document.getElementById(
-      "locationStatus"
-    );
-
-
-  status.textContent =
-    "اضغط على «تحديد موقعي» لاختيار مكان التوصيل.";
-
-  status.className =
-    "location-status";
-
-}
-
-
-/* =========================
-   CHECKOUT
-========================= */
-
-async function checkout(){
-
-  if(!cart.length){
-
-    alert("السلة فارغة.");
-
-    return;
-
-  }
-
-
-  const token =
-    localStorage.getItem("token");
-
-
-  if(!token){
-
-    closeModal("cartModal");
-
-    openAuth();
-
-    return;
-
-  }
-
-
-  document.getElementById(
-    "orderPhone"
-  ).value =
-    currentUser?.phone || "";
-
-
-  closeModal("cartModal");
-
-  openModal("checkoutModal");
-
-
-  setTimeout(()=>{
-    initMap();
-  },100);
-
-}
-
-
-async function placeOrder(event){
-
-  event.preventDefault();
-
-  clearMessage("checkoutMessage");
-
-
-  const address =
-    document.getElementById("address")
-      .value
-      .trim();
-
-
-  const phone =
-    document.getElementById("orderPhone")
-      .value
-      .trim();
-
-
-  const token =
-    localStorage.getItem("token");
-
-
-  if(!token){
-
-    closeModal("checkoutModal");
-
-    openAuth();
-
-    return;
-
-  }
-
-
-  if(
-    selectedLatitude === null ||
-    selectedLongitude === null
-  ){
-
-    showMessage(
-      "checkoutMessage",
-      "لازم تحدد موقع التوصيل على الخريطة."
-    );
-
-    return;
-
-  }
-
-
-  const items =
-    cart.map((item)=>({
-
-      product_id:item.id,
-      quantity:item.quantity
-
-    }));
-
-
-  try{
-
-    const response =
-      await fetch(
-        API + "/orders",
-        {
-          method:"POST",
-
-          headers:{
-            "Content-Type":
-              "application/json",
-
-            Authorization:
-              "Bearer " + token
-          },
-
-          body:JSON.stringify({
-
-            items,
-
-            address,
-
-            phone,
-
-            latitude:
-              selectedLatitude,
-
-            longitude:
-              selectedLongitude
-
-          })
-
-        }
-      );
-
-
-    const data =
-      await response.json();
-
-
-    if(response.status === 401){
-
+    function logout() {
       localStorage.removeItem("token");
 
       currentUser = null;
+      cart = [];
 
+      selectedLatitude = null;
+      selectedLongitude = null;
+
+      updateCartUI();
+      clearAuthFields();
       updateUserUI();
 
+      closeModal("cartModal");
       closeModal("checkoutModal");
+      closeModal("ordersModal");
+      closeModal("authModal");
 
-      openAuth();
-
-      return;
-
-    }
-
-
-    if(!response.ok){
-
-      showMessage(
-        "checkoutMessage",
-        data.error ||
-        "فشل إرسال الطلب."
+      showToast(
+        "تم تسجيل الخروج بنجاح."
       );
 
-      return;
-
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     }
 
-
-    cart = [];
-
-    updateCartUI();
-
-
-    document.getElementById(
-      "address"
-    ).value = "";
-
-
-    document.getElementById(
-      "orderPhone"
-    ).value = "";
-
-
-    resetLocation();
-
-
-    closeModal("checkoutModal");
-
-
-    alert(
-      "تم إرسال طلبك بنجاح 🎉\nرقم الطلب: " +
-      data.order.id
-    );
-
-
-    await loadOrders();
-
-
-  }catch{
-
-    showMessage(
-      "checkoutMessage",
-      "تعذر الاتصال بالخادم."
-    );
-
-  }
-
-}
-
-
-/* =========================
-   ORDERS
-========================= */
-
-async function loadOrders(){
-
-  const token =
-    localStorage.getItem("token");
-
-
-  if(!token) return;
-
-
-  try{
-
-    const response =
-      await fetch(
-        API + "/orders",
-        {
-          headers:{
-            Authorization:
-              "Bearer " + token
-          }
-        }
-      );
-
-
-    if(!response.ok) return;
-
-
-    const data =
-      await response.json();
-
-
-    window.myOrders = data;
-
-  }catch{
-
-    window.myOrders = [];
-
-  }
-
-}
-
-
-function statusText(status){
-
-  const statuses = {
-
-    received:"تم استلام الطلب",
-
-    preparing:"قيد التحضير",
-
-    pickup:"جاهز للاستلام",
-
-    on_the_way:"في الطريق 🚗",
-
-    delivered:"تم التوصيل ✅",
-
-    cancelled:"ملغى"
-
-  };
-
-
-  return statuses[status] || status;
-
-}
-
-
-function openOrders(){
-
-  renderOrders();
-
-  openModal("ordersModal");
-
-}
-
-
-async function renderOrders(){
-
-  const container =
-    document.getElementById(
-      "ordersList"
-    );
-
-
-  container.innerHTML =
-    `<div class="empty">
-      جاري تحميل الطلبات...
-    </div>`;
-
-
-  await loadOrders();
-
-
-  const orders =
-    window.myOrders || [];
-
-
-  if(!orders.length){
-
-    container.innerHTML =
-      `<div class="empty">
-        ما عندك حتى طلب حاليا.
-      </div>`;
-
-    return;
-
-  }
-
-
-  container.innerHTML =
-    orders.map((order)=>{
-
-      const items =
-        Array.isArray(order.items)
-          ? order.items
-          : [];
-
-
-      return `
-
-        <div class="order">
-
-          <div style="
-            display:flex;
-            justify-content:space-between;
-            gap:10px;
-          ">
-
-            <strong>
-              طلب #${order.id}
-            </strong>
-
-            <span class="status">
-              ${escapeHTML(
-                statusText(order.status)
-              )}
-            </span>
-
-          </div>
-
-          <hr>
-
-          ${items.map((item)=>`
-
-            <div style="margin:5px 0">
-
-              ${escapeHTML(
-                item.emoji || "🍽️"
-              )}
-
-              ${escapeHTML(item.name)}
-
-              × ${item.quantity}
-
-            </div>
-
-          `).join("")}
-
-          <hr>
-
-          <strong>
-            المجموع:
-            ${money(order.total)}
-          </strong>
-
-          <br>
-
-          <small>
-            ${escapeHTML(order.address)}
-          </small>
-
-        </div>
-
-      `;
-
-    }).join("");
-
-}
-
-
-/* =========================
-   START
-========================= */
-
-document.addEventListener(
-  "DOMContentLoaded",
-  async ()=>{
-
-    await checkSession();
-
-    await loadProducts();
-
-    updateCartUI();
-
-  }
-);
-
-
-/* إغلاق النوافذ عند الضغط خارجها */
-
-document
-  .querySelectorAll(".modal")
-  .forEach((modal)=>{
-
-    modal.addEventListener(
-      "click",
-      (event)=>{
-
-        if(event.target === modal){
-
-          modal.style.display =
-            "none";
-
-        }
-
+    /* =========================
+       PRODUCTS
+    ========================= */
+
+    async function loadProducts() {
+      try {
+        const data =
+          await api("/api/products");
+
+        products =
+          data.products || [];
+
+        renderProducts();
+      } catch (error) {
+        document.getElementById(
+          "products"
+        ).innerHTML =
+          `<div class="empty">
+            ${escapeHTML(error.message)}
+          </div>`;
       }
-    );
+    }
 
-  });
+    function setCategory(
+      category,
+      button
+    ) {
+      selectedCategory = category;
 
-</script>
+      document
+        .querySelectorAll(".category")
+        .forEach((item) => {
+          item.classList.remove(
+            "active"
+          );
+        });
+
+      button.classList.add("active");
+
+      renderProducts();
+    }
+
+    function renderProducts() {
+      const container =
+        document.getElementById(
+          "products"
+        );
+
+      const search =
+        document.getElementById(
+          "searchInput"
+        ).value
+          .trim()
+          .toLowerCase();
+
+      let filtered =
+        products.filter(
+          (product) => {
+            const matchesCategory =
+              selectedCategory === "all" ||
+              product.category ===
+                selectedCategory;
+
+            const matchesSearch =
+              !search ||
+              product.name
+                .toLowerCase()
+                .includes(search);
+
+            return (
+              matchesCategory &&
+              matchesSearch
+            );
+          }
+        );
+
+      if (!filtered.length) {
+        container.innerHTML =
+          `<div class="empty">
+            ما لقيناش نتائج.
+          </div>`;
+
+        return;
+      }
+
+      container.innerHTML =
+        filtered
+          .map(
+            (product) => `
+              <div class="product">
+
+                <div class="product-image">
+                  ${escapeHTML(
+                    product.emoji || "🍔"
+                  )}
+                </div>
+
+                <h3>
+                  ${escapeHTML(
+                    product.name
+                  )}
+                </h3>
+
+                <div class="product-category">
+                  ${escapeHTML(
+                    product.category
+                  )}
+                </div>
+
+                <div class="product-bottom">
+
+                  <span class="price">
+                    ${Number(
+                      product.price
+                    ).toLocaleString(
+                      "fr-DZ"
+                    )} دج
+                  </span>
+
+                  <button
+                    class="add-btn"
+                    onclick="addToCart(${product.id})"
+                  >
+                    إضافة +
+                  </button>
+
+                </div>
+
+              </div>
+            `
+          )
+          .join("");
+    }
+
+    /* =========================
+       CART
+    ========================= */
+
+    function addToCart(productId) {
+      const product =
+        products.find(
+          (item) =>
+            Number(item.id) ===
+            Number(productId)
+        );
+
+      if (!product) return;
+
+      const existing =
+        cart.find(
+          (item) =>
+            Number(item.productId) ===
+            Number(productId)
+        );
+
+      if (existing) {
+        if (existing.quantity >= 20) {
+          showToast(
+            "الحد الأقصى 20 من نفس المنتج."
+          );
+          return;
+        }
+
+        existing.quantity++;
+      } else {
+        cart.push({
+          productId:
+            product.id,
+          name:
+            product.name,
+          price:
+            product.price,
+          restaurantId:
+            product.restaurant_id,
+          quantity: 1
+        });
+      }
+
+      updateCartUI();
+
+      showToast(
+        "تمت إضافة المنتج للسلة 🛒"
+      );
+    }
+
+    function changeQuantity(
+      productId,
+      change
+    ) {
+      const item =
+        cart.find(
+          (cartItem) =>
+            Number(
+              cartItem.productId
+            ) === Number(productId)
+        );
+
+      if (!item) return;
+
+      item.quantity += change;
+
+      if (item.quantity <= 0) {
+        cart = cart.filter(
+          (cartItem) =>
+            Number(
+              cartItem.productId
+            ) !== Number(productId)
+        );
+      }
+
+      if (item.quantity > 20) {
+        item.quantity = 20;
+      }
+
+      updateCartUI();
+    }
+
+    function getCartSubtotal() {
+      return cart.reduce(
+        (sum, item) =>
+          sum +
+          Number(item.price) *
+            Number(item.quantity),
+        0
+      );
+    }
+
+    function updateCartUI() {
+      const count =
+        cart.reduce(
+          (sum, item) =>
+            sum + item.quantity,
+          0
+        );
+
+      document.getElementById(
+        "cartCount"
+      ).textContent = count;
+
+      renderCart();
+    }
+
+    function renderCart() {
+      const container =
+        document.getElementById(
+          "cartItems"
+        );
+
+      const summary =
+        document.getElementById(
+          "cartSummary"
+        );
+
+      if (!cart.length) {
+        container.innerHTML =
+          `<div class="empty">
+            السلة فارغة 🛒
+          </div>`;
+
+        summary.style.display =
+          "none";
+
+        return;
+      }
+
+      summary.style.display =
+        "block";
+
+      container.innerHTML =
+        cart
+          .map(
+            (item) => `
+              <div class="cart-item">
+
+                <div class="cart-item-info">
+
+                  <div class="cart-item-name">
+                    ${escapeHTML(
+                      item.name
+                    )}
+                  </div>
+
+                  <div>
+                    ${Number(
+                      item.price
+                    ).toLocaleString(
+                      "fr-DZ"
+                    )} دج
+                  </div>
+
+                </div>
+
+                <div class="quantity">
+
+                  <button
+                    onclick="changeQuantity(${item.productId}, -1)"
+                  >
+                    −
+                  </button>
+
+                  <strong>
+                    ${item.quantity}
+                  </strong>
+
+                  <button
+                    onclick="changeQuantity(${item.productId}, 1)"
+                  >
+                    +
+                  </button>
+
+                </div>
+
+              </div>
+            `
+          )
+          .join("");
+
+      document.getElementById(
+        "cartTotal"
+      ).textContent =
+        (
+          getCartSubtotal()
+        ).toLocaleString(
+          "fr-DZ"
+        ) + " دج";
+    }
+
+    function openCartModal() {
+      renderCart();
+      openModal("cartModal");
+    }
+
+    /* =========================
+       CHECKOUT
+    ========================= */
+
+    function startCheckout() {
+      if (!cart.length) {
+        showToast(
+          "السلة فارغة."
+        );
+        return;
+      }
+
+      if (!currentUser) {
+        closeModal("cartModal");
+        openAuthModal();
+
+        showToast(
+          "سجل الدخول أولا لإكمال الطلب."
+        );
+
+        return;
+      }
+
+      /*
+        منع خلط مطاعم مختلفة
+      */
+      const restaurantIds =
+        [
+          ...new Set(
+            cart.map(
+              (item) =>
+                Number(
+                  item.restaurantId
+                )
+            )
+          )
+        ];
+
+      if (restaurantIds.length !== 1) {
+        showToast(
+          "الطلب يجب أن يكون من مطعم واحد."
+        );
+        return;
+      }
+
+      document.getElementById(
+        "orderPhone"
+      ).value =
+        currentUser.phone || "";
+
+      document.getElementById(
+        "address"
+      ).value = "";
+
+      selectedLatitude = null;
+      selectedLongitude = null;
+
+      document.getElementById(
+        "locationStatus"
+      ).textContent =
+        "⚠️ يجب تحديد موقع التوصيل.";
+
+      document.getElementById(
+        "coordinates"
+      ).textContent = "";
+
+      const total =
+        getCartSubtotal() +
+        DELIVERY_FEE;
+
+      document.getElementById(
+        "checkoutTotal"
+      ).textContent =
+        total.toLocaleString(
+          "fr-DZ"
+        ) + " دج";
+
+      closeModal("cartModal");
+
+      openModal(
+        "checkoutModal"
+      );
+
+      setTimeout(() => {
+        initializeMap();
+      }, 150);
+    }
+
+    /* =========================
+       MAP
+    ========================= */
+
+    function initializeMap() {
+      if (map) {
+        map.invalidateSize();
+        return;
+      }
+
+      /*
+        موقع افتراضي عام في الجزائر
+        وليس موقع المستخدم الحقيقي.
+      */
+      const defaultLat = 36.7525;
+      const defaultLng = 3.0420;
+
+      map = L.map("map").setView(
+        [
+          defaultLat,
+          defaultLng
+        ],
+        12
+      );
+
+      L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+          maxZoom: 19,
+          attribution:
+            '&copy; OpenStreetMap contributors'
+        }
+      ).addTo(map);
+
+      marker = L.marker(
+        [
+          defaultLat,
+          defaultLng
+        ],
+        {
+          draggable: true
+        }
+      ).addTo(map);
+
+      marker.bindPopup(
+        "حرّك العلامة إلى مكان التوصيل 📍"
+      );
+
+      marker.on(
+        "dragend",
+        function () {
+          const position =
+            marker.getLatLng();
+
+          setSelectedLocation(
+            position.lat,
+            position.lng
+          );
+        }
+      );
+
+      map.on(
+        "click",
+        function (event) {
+          setSelectedLocation(
+            event.latlng.lat,
+            event.latlng.lng
+          );
+        }
+      );
+    }
+
+    function setSelectedLocation(
+      lat,
+      lng
+    ) {
+      selectedLatitude =
+        Number(lat);
+
+      selectedLongitude =
+        Number(lng);
+
+      if (marker) {
+        marker.setLatLng([
+          selectedLatitude,
+          selectedLongitude
+        ]);
+      }
+
+      if (map) {
+        map.panTo([
+          selectedLatitude,
+          selectedLongitude
+        ]);
+      }
+
+      document.getElementById(
+        "locationStatus"
+      ).innerHTML =
+        "✅ تم تحديد موقع التوصيل.";
+
+      document.getElementById(
+        "coordinates"
+      ).textContent =
+        `Latitude: ${selectedLatitude.toFixed(
+          6
+        )} | Longitude: ${selectedLongitude.toFixed(
+          6
+        )}`;
+    }
+
+    function locateUser() {
+      if (!navigator.geolocation) {
+        showToast(
+          "المتصفح لا يدعم تحديد الموقع."
+        );
+        return;
+      }
+
+      showToast(
+        "جاري تحديد موقعك..."
+      );
+
+      navigator.geolocation.getCurrentPosition(
+        function (position) {
+          const lat =
+            position.coords.latitude;
+
+          const lng =
+            position.coords.longitude;
+
+          setSelectedLocation(
+            lat,
+            lng
+          );
+
+          if (map) {
+            map.setView(
+              [lat, lng],
+              17
+            );
+          }
+
+          showToast(
+            "تم تحديد موقعك 📍"
+          );
+        },
+        function (error) {
+          let message =
+            "تعذر تحديد موقعك.";
+
+          if (
+            error.code ===
+            error.PERMISSION_DENIED
+          ) {
+            message =
+              "سمح للموقع من إعدادات المتصفح باش نقدر نحدد مكانك.";
+          }
+
+          showToast(message);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 0
+        }
+      );
+    }
+
+    function resetMapLocation() {
+      selectedLatitude = null;
+      selectedLongitude = null;
+
+      const defaultLat =
+        36.7525;
+
+      const defaultLng =
+        3.0420;
+
+      if (map) {
+        map.setView(
+          [
+            defaultLat,
+            defaultLng
+          ],
+          12
+        );
+      }
+
+      if (marker) {
+        marker.setLatLng([
+          defaultLat,
+          defaultLng
+        ]);
+      }
+
+      document.getElementById(
+        "locationStatus"
+      ).textContent =
+        "⚠️ يجب تحديد موقع التوصيل.";
+
+      document.getElementById(
+        "coordinates"
+      ).textContent = "";
+    }
+
+    /* =========================
+       CONFIRM ORDER
+    ========================= */
+
+    async function confirmOrder() {
+      if (!currentUser) {
+        showToast(
+          "سجل الدخول أولا."
+        );
+        return;
+      }
+
+      if (!cart.length) {
+        showToast(
+          "السلة فارغة."
+        );
+        return;
+      }
+
+      const phone =
+        document.getElementById(
+          "orderPhone"
+        ).value.trim();
+
+      const address =
+        document.getElementById(
+          "address"
+        ).value.trim();
+
+      if (!phone) {
+        showToast(
+          "أدخل رقم الهاتف."
+        );
+        return;
+      }
+
+      if (address.length < 3) {
+        showToast(
+          "أدخل العنوان بالتفصيل."
+        );
+        return;
+      }
+
+      /*
+        مهم:
+        الموقع إجباري
+      */
+      if (
+        selectedLatitude === null ||
+        selectedLongitude === null
+      ) {
+        showToast(
+          "حدد موقع التوصيل على الخريطة أولا 📍"
+        );
+        return;
+      }
+
+      const restaurantId =
+        Number(
+          cart[0].restaurantId
+        );
+
+      const button =
+        document.getElementById(
+          "confirmOrderButton"
+        );
+
+      button.disabled = true;
+      button.textContent =
+        "جاري إرسال الطلب...";
+
+      try {
+        const data =
+          await api(
+            "/api/orders",
+            {
+              method: "POST",
+              body: JSON.stringify({
+                restaurantId,
+                items: cart.map(
+                  (item) => ({
+                    productId:
+                      Number(
+                        item.productId
+                      ),
+                    quantity:
+                      Number(
+                        item.quantity
+                      )
+                  })
+                ),
+                address,
+                phone,
+                latitude:
+                  selectedLatitude,
+                longitude:
+                  selectedLongitude
+              })
+            }
+          );
+
+        cart = [];
+
+        updateCartUI();
+
+        closeModal(
+          "checkoutModal"
+        );
+
+        showToast(
+          "تم إرسال طلبك بنجاح 🎉"
+        );
+
+        console.log(
+          "Created order:",
+          data.order
+        );
+
+      } catch (error) {
+        showToast(
+          error.message
+        );
+      } finally {
+        button.disabled = false;
+        button.textContent =
+          "✅ تأكيد الطلب";
+      }
+    }
+
+    /* =========================
+       ORDERS
+    ========================= */
+
+    async function openOrdersModal() {
+      if (!currentUser) {
+        openAuthModal();
+        return;
+      }
+
+      const container =
+        document.getElementById(
+          "ordersList"
+        );
+
+      container.innerHTML =
+        `<div class="empty">
+          جاري تحميل الطلبات...
+        </div>`;
+
+      openModal("ordersModal");
+
+      try {
+        const data =
+          await api(
+            "/api/orders"
+          );
+
+        const orders =
+          data.orders || [];
+
+        if (!orders.length) {
+          container.innerHTML =
+            `<div class="empty">
+              ما عندك حتى طلب حاليا.
+            </div>`;
+
+          return;
+        }
+
+        container.innerHTML =
+          orders
+            .map(
+              (order) => {
+                let items = [];
+
+                try {
+                  items =
+                    JSON.parse(
+                      order.items
+                    );
+                } catch {
+                  items = [];
+                }
+
+                const itemsText =
+                  items
+                    .map(
+                      (item) =>
+                        `${escapeHTML(
+                          item.name
+                        )} × ${
+                          item.quantity
+                        }`
+                    )
+                    .join("، ");
+
+                let mapButton = "";
+
+                if (
+                  order.latitude !== null &&
+                  order.longitude !== null
+                ) {
+                  const lat =
+                    Number(
+                      order.latitude
+                    );
+
+                  const lng =
+                    Number(
+                      order.longitude
+                    );
+
+                  if (
+                    Number.isFinite(
+                      lat
+                    ) &&
+                    Number.isFinite(
+                      lng
+                    )
+                  ) {
+                    mapButton =
+                      `
+                      <a
+                        class="map-link"
+                        href="https://www.google.com/maps?q=${lat},${lng}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        📍 فتح موقع التوصيل
+                      </a>
+                      `;
+                  }
+                }
+
+                return `
+                  <div class="order-card">
+
+                    <strong>
+                      الطلب #${order.id}
+                    </strong>
+
+                    <div style="margin-top:8px">
+                      ${itemsText}
+                    </div>
+
+                    <div style="margin-top:8px">
+                      المجموع:
+                      <strong>
+                        ${Number(
+                          order.total
+                        ).toLocaleString(
+                          "fr-DZ"
+                        )} دج
+                      </strong>
+                    </div>
+
+                    <div>
+                      العنوان:
+                      ${escapeHTML(
+                        order.address
+                      )}
+                    </div>
+
+                    <span class="order-status">
+                      ${formatStatus(
+                        order.status
+                      )}
+                    </span>
+
+                    ${mapButton}
+
+                  </div>
+                `;
+              }
+            )
+            .join("");
+
+      } catch (error) {
+        container.innerHTML =
+          `<div class="empty">
+            ${escapeHTML(
+              error.message
+            )}
+          </div>`;
+      }
+    }
+
+    function formatStatus(status) {
+      const statuses = {
+        received:
+          "تم استلام الطلب",
+        preparing:
+          "جاري التحضير",
+        pickup:
+          "جاهز للاستلام",
+        on_the_way:
+          "في الطريق 🚗",
+        delivered:
+          "تم التوصيل ✅",
+        cancelled:
+          "ملغى ❌"
+      };
+
+      return (
+        statuses[status] ||
+        status
+      );
+    }
+
+    /* =========================
+       INIT
+    ========================= */
+
+    async function init() {
+      await checkSession();
+      await loadProducts();
+      updateCartUI();
+    }
+
+    init();
+  </script>
 
 </body>
 </html>
