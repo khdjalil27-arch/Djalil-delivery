@@ -1,0 +1,1642 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Djalil Delivery — Admin</title>
+
+<style>
+:root{
+  --y:#ffd21c;
+  --b:#111;
+  --g:#f5f5f5;
+  --w:#fff;
+  --r:#e53935;
+  --green:#20a464;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--g);
+  color:#111;
+}
+
+header{
+  background:#111;
+  color:#fff;
+  padding:16px 5%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+
+.logo{
+  font-size:23px;
+  font-weight:900;
+}
+
+.logo span{
+  color:var(--y);
+}
+
+header button{
+  border:0;
+  border-radius:10px;
+  padding:10px 15px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.logout{
+  background:#e53935;
+  color:#fff;
+}
+
+main{
+  max-width:1250px;
+  margin:auto;
+  padding:25px 5%;
+}
+
+h1{
+  margin-top:0;
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:15px;
+}
+
+.stat{
+  background:#fff;
+  border-radius:16px;
+  padding:20px;
+  box-shadow:0 4px 15px #0000000d;
+}
+
+.stat small{
+  color:#777;
+}
+
+.stat strong{
+  display:block;
+  font-size:30px;
+  margin-top:8px;
+}
+
+.section{
+  background:#fff;
+  border-radius:18px;
+  padding:20px;
+  margin-top:25px;
+  box-shadow:0 4px 15px #0000000d;
+  overflow:auto;
+}
+
+.section h2{
+  margin-top:0;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:700px;
+}
+
+th,td{
+  padding:12px;
+  border-bottom:1px solid #eee;
+  text-align:right;
+}
+
+th{
+  background:#fafafa;
+}
+
+select,input{
+  padding:9px;
+  border:1px solid #ddd;
+  border-radius:8px;
+}
+
+button{
+  border:0;
+  border-radius:9px;
+  padding:9px 13px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.save{
+  background:var(--y);
+}
+
+.add{
+  background:#111;
+  color:#fff;
+}
+
+.delete{
+  background:#e53935;
+  color:#fff;
+}
+
+.form{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.form input{
+  width:100%;
+}
+
+.message{
+  padding:15px;
+  border-radius:12px;
+  background:#fff3cd;
+  margin-bottom:15px;
+}
+
+.status{
+  padding:6px 10px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:800;
+  background:#eee;
+}
+
+.status.received{background:#fff0a8}
+.status.preparing{background:#ffe082}
+.status.pickup{background:#b3e5fc}
+.status.on_the_way{background:#ce93d8}
+.status.delivered{background:#b9f6ca}
+.status.cancelled{background:#ffcdd2}
+
+.login{
+  max-width:420px;
+  margin:80px auto;
+  background:#fff;
+  padding:25px;
+  border-radius:20px;
+}
+
+.login input{
+  width:100%;
+  padding:14px;
+  margin:7px 0;
+}
+
+.login button{
+  width:100%;
+  margin-top:8px;
+  background:var(--y);
+}
+
+.hidden{
+  display:none;
+}
+
+.empty{
+  text-align:center;
+  padding:30px;
+  color:#777;
+}
+
+@media(max-width:600px){
+  header{
+    padding:12px 4%;
+  }
+
+  .logo{
+    font-size:18px;
+  }
+
+  main{
+    padding:20px 4%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">
+    DJALIL <span>DELIVERY ADMIN</span>
+  </div>
+
+  <button class="logout" onclick="logout()">
+    تسجيل الخروج
+  </button>
+</header>
+
+<div id="loginBox" class="login">
+
+  <h2>🔐 دخول الإدارة</h2>
+
+  <input
+    id="phone"
+    placeholder="رقم الهاتف"
+    inputmode="tel"
+  >
+
+  <input
+    id="password"
+    type="password"
+    placeholder="كلمة السر"
+  >
+
+  <button onclick="login()">
+    دخول
+  </button>
+
+  <p id="loginError"></p>
+
+</div>
+
+<div id="dashboard" class="hidden">
+
+<main>
+
+<h1>📊 لوحة التحكم</h1>
+
+<div id="message" class="message">
+جاري تحميل لوحة التحكم...
+</div>
+
+<section class="stats">
+
+  <div class="stat">
+    <small>📦 كل الطلبات</small>
+    <strong id="orders">0</strong>
+  </div>
+
+  <div class="stat">
+    <small>⏳ الطلبات الحالية</small>
+    <strong id="pending">0</strong>
+  </div>
+
+  <div class="stat">
+    <small>💰 المداخيل</small>
+    <strong id="revenue">0 دج</strong>
+  </div>
+
+  <div class="stat">
+    <small>👥 الزبائن</small>
+    <strong id="customers">0</strong>
+  </div>
+
+  <div class="stat">
+    <small>🏪 المطاعم</small>
+    <strong id="restaurants">0</strong>
+  </div>
+
+</section>
+
+
+<section class="section">
+
+<h2>📦 الطلبات</h2>
+
+<div id="ordersBox">
+  <div class="empty">جاري التحميل...</div>
+</div>
+
+</section>
+
+
+<section class="section">
+
+<h2>🍔 المنتجات</h2>
+
+<div class="form">
+
+<input id="productName" placeholder="اسم المنتج">
+
+<input id="productCategory" placeholder="التصنيف">
+
+<input id="productPrice" type="number" placeholder="السعر">
+
+<input id="productEmoji" placeholder="🍔">
+
+<select id="productRestaurant">
+<option value="">اختر المطعم</option>
+</select>
+
+<button class="add" onclick="addProduct()">
++ إضافة منتج
+</button>
+
+</div>
+
+<div id="productsBox">
+  <div class="empty">جاري التحميل...</div>
+</div>
+
+</section>
+
+
+<section class="section">
+
+<h2>🏪 المطاعم</h2>
+
+<div class="form">
+
+<input id="restaurantName" placeholder="اسم المطعم">
+
+<input id="restaurantPhone" placeholder="الهاتف">
+
+<input id="restaurantAddress" placeholder="العنوان">
+
+<button class="add" onclick="addRestaurant()">
++ إضافة مطعم
+</button>
+
+</div>
+
+<div id="restaurantsBox">
+  <div class="empty">جاري التحميل...</div>
+</div>
+
+</section>
+
+
+<section class="section">
+
+<h2>👥 المستخدمون</h2>
+
+<div id="usersBox">
+  <div class="empty">جاري التحميل...</div>
+</div>
+
+</section>
+
+</main>
+
+</div>
+
+
+<script>
+
+const API = "";
+
+let token =
+  localStorage.getItem("adminToken");
+
+
+function escapeHTML(value){
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+
+async function api(url,options={}){
+
+  const headers = {
+    ...(options.headers || {}),
+    "Authorization":
+      "Bearer " + token
+  };
+
+  if(options.body){
+    headers["Content-Type"] =
+      "application/json";
+  }
+
+  const res =
+    await fetch(
+      API + url,
+      {
+        ...options,
+        headers
+      }
+    );
+
+  if(res.status === 401){
+
+    logout();
+
+    throw new Error(
+      "جلسة الإدارة انتهت"
+    );
+
+  }
+
+  const data =
+    await res.json();
+
+  if(!res.ok){
+
+    throw new Error(
+      data.error ||
+      "حدث خطأ"
+    );
+
+  }
+
+  return data;
+
+}
+
+
+async function login(){
+
+  const phone =
+    document
+      .getElementById("phone")
+      .value
+      .trim();
+
+  const password =
+    document
+      .getElementById("password")
+      .value;
+
+  const error =
+    document
+      .getElementById("loginError");
+
+  error.textContent = "";
+
+  if(!phone || !password){
+
+    error.textContent =
+      "دخل رقم الهاتف وكلمة السر";
+
+    return;
+
+  }
+
+  try{
+
+    const res =
+      await fetch(
+        API + "/api/login",
+        {
+          method:"POST",
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+          body:JSON.stringify({
+            phone,
+            password
+          })
+        }
+      );
+
+    const data =
+      await res.json();
+
+    if(!res.ok){
+
+      error.textContent =
+        data.error ||
+        "بيانات الدخول خاطئة";
+
+      return;
+
+    }
+
+    if(data.user.role !== "admin"){
+
+      error.textContent =
+        "هذا الحساب ليس Admin";
+
+      return;
+
+    }
+
+    localStorage.setItem(
+      "adminToken",
+      data.token
+    );
+
+    token =
+      data.token;
+
+    showDashboard();
+
+  }catch{
+
+    error.textContent =
+      "تعذر الاتصال بالخادم";
+
+  }
+
+}
+
+
+function logout(){
+
+  localStorage.removeItem(
+    "adminToken"
+  );
+
+  token = null;
+
+  document
+    .getElementById("dashboard")
+    .classList.add("hidden");
+
+  document
+    .getElementById("loginBox")
+    .classList.remove("hidden");
+
+}
+
+
+function showDashboard(){
+
+  document
+    .getElementById("loginBox")
+    .classList.add("hidden");
+
+  document
+    .getElementById("dashboard")
+    .classList.remove("hidden");
+
+  loadDashboard();
+
+}
+
+
+function setMessage(text){
+
+  document
+    .getElementById("message")
+    .textContent = text;
+
+}
+
+
+async function loadDashboard(){
+
+  try{
+
+    setMessage(
+      "جاري تحميل البيانات..."
+    );
+
+    await Promise.all([
+      loadStats(),
+      loadOrders(),
+      loadRestaurants(),
+      loadProducts(),
+      loadUsers()
+    ]);
+
+    setMessage(
+      "لوحة التحكم جاهزة ✅"
+    );
+
+  }catch(error){
+
+    setMessage(
+      error.message
+    );
+
+  }
+
+}
+
+
+async function loadStats(){
+
+  const data =
+    await api(
+      "/api/admin/stats"
+    );
+
+  document
+    .getElementById("orders")
+    .textContent =
+      data.orders;
+
+  document
+    .getElementById("pending")
+    .textContent =
+      data.pending;
+
+  document
+    .getElementById("revenue")
+    .textContent =
+      Number(data.revenue)
+        .toLocaleString("ar-DZ")
+      + " دج";
+
+  document
+    .getElementById("customers")
+    .textContent =
+      data.customers;
+
+  document
+    .getElementById("restaurants")
+    .textContent =
+      data.restaurants;
+
+}
+
+
+function statusText(status){
+
+  const map = {
+
+    received:"تم الاستلام",
+
+    preparing:"قيد التحضير",
+
+    pickup:"جاهز للاستلام",
+
+    on_the_way:"في الطريق",
+
+    delivered:"تم التوصيل",
+
+    cancelled:"ملغى"
+
+  };
+
+  return map[status] ||
+    status;
+
+}
+
+
+async function loadOrders(){
+
+  const data =
+    await api(
+      "/api/orders"
+    );
+
+  const box =
+    document
+      .getElementById(
+        "ordersBox"
+      );
+
+  if(!data.length){
+
+    box.innerHTML =
+      `<div class="empty">
+        ما كاين حتى طلب حاليا
+      </div>`;
+
+    return;
+
+  }
+
+  box.innerHTML = `
+
+  <table>
+
+  <thead>
+
+  <tr>
+
+    <th>الطلب</th>
+
+    <th>الزبون</th>
+
+    <th>الهاتف</th>
+
+    <th>المجموع</th>
+
+    <th>العنوان</th>
+
+    <th>الحالة</th>
+
+    <th>تغيير</th>
+
+  </tr>
+
+  </thead>
+
+  <tbody>
+
+  ${data.map(order => `
+
+    <tr>
+
+      <td>
+        #${order.id}
+      </td>
+
+      <td>
+        ${escapeHTML(
+          order.customer ||
+          "—"
+        )}
+      </td>
+
+      <td>
+        ${escapeHTML(
+          order.customer_phone ||
+          order.phone ||
+          "—"
+        )}
+      </td>
+
+      <td>
+        ${Number(
+          order.total
+        ).toLocaleString("ar-DZ")}
+        دج
+      </td>
+
+      <td>
+        ${escapeHTML(
+          order.address
+        )}
+      </td>
+
+      <td>
+
+        <span class="status ${escapeHTML(
+          order.status
+        )}">
+
+          ${escapeHTML(
+            statusText(
+              order.status
+            )
+          )}
+
+        </span>
+
+      </td>
+
+      <td>
+
+        <select
+          onchange="
+            changeStatus(
+              ${order.id},
+              this.value
+            )
+          "
+        >
+
+          ${[
+            "received",
+            "preparing",
+            "pickup",
+            "on_the_way",
+            "delivered",
+            "cancelled"
+          ].map(s => `
+
+            <option
+              value="${s}"
+              ${s === order.status
+                ? "selected"
+                : ""}
+            >
+              ${statusText(s)}
+            </option>
+
+          `).join("")}
+
+        </select>
+
+      </td>
+
+    </tr>
+
+  `).join("")}
+
+  </tbody>
+
+  </table>
+
+  `;
+
+}
+
+
+async function changeStatus(
+  id,
+  status
+){
+
+  try{
+
+    await api(
+      `/api/orders/${id}/status`,
+      {
+        method:"PATCH",
+        body:JSON.stringify({
+          status
+        })
+      }
+    );
+
+    await Promise.all([
+      loadOrders(),
+      loadStats()
+    ]);
+
+    setMessage(
+      "تم تحديث حالة الطلب ✅"
+    );
+
+  }catch(error){
+
+    alert(error.message);
+
+  }
+
+}
+
+
+async function loadRestaurants(){
+
+  const data =
+    await api(
+      "/api/admin/restaurants"
+    );
+
+  const select =
+    document
+      .getElementById(
+        "productRestaurant"
+      );
+
+  select.innerHTML =
+    `<option value="">
+      اختر المطعم
+    </option>` +
+    data
+      .filter(x => x.active)
+      .map(x => `
+        <option value="${x.id}">
+          ${escapeHTML(x.name)}
+        </option>
+      `)
+      .join("");
+
+  const box =
+    document
+      .getElementById(
+        "restaurantsBox"
+      );
+
+  if(!data.length){
+
+    box.innerHTML =
+      `<div class="empty">
+        لا توجد مطاعم
+      </div>`;
+
+    return;
+
+  }
+
+  box.innerHTML = `
+
+  <table>
+
+  <thead>
+
+  <tr>
+
+    <th>الاسم</th>
+
+    <th>الهاتف</th>
+
+    <th>العنوان</th>
+
+    <th>الحالة</th>
+
+    <th>إجراء</th>
+
+  </tr>
+
+  </thead>
+
+  <tbody>
+
+  ${data.map(r => `
+
+    <tr>
+
+      <td>
+        ${escapeHTML(r.name)}
+      </td>
+
+      <td>
+        ${escapeHTML(
+          r.phone || "—"
+        )}
+      </td>
+
+      <td>
+        ${escapeHTML(
+          r.address || "—"
+        )}
+      </td>
+
+      <td>
+        ${r.active
+          ? "🟢 نشط"
+          : "🔴 متوقف"}
+      </td>
+
+      <td>
+
+        ${
+          r.active
+          ? `
+            <button
+              class="delete"
+              onclick="
+                disableRestaurant(
+                  ${r.id}
+                )
+              "
+            >
+              تعطيل
+            </button>
+          `
+          : "—"
+        }
+
+      </td>
+
+    </tr>
+
+  `).join("")}
+
+  </tbody>
+
+  </table>
+
+  `;
+
+}
+
+
+async function addRestaurant(){
+
+  const name =
+    document
+      .getElementById(
+        "restaurantName"
+      )
+      .value
+      .trim();
+
+  const phone =
+    document
+      .getElementById(
+        "restaurantPhone"
+      )
+      .value
+      .trim();
+
+  const address =
+    document
+      .getElementById(
+        "restaurantAddress"
+      )
+      .value
+      .trim();
+
+  if(!name){
+
+    return alert(
+      "دخل اسم المطعم"
+    );
+
+  }
+
+  try{
+
+    await api(
+      "/api/admin/restaurants",
+      {
+        method:"POST",
+        body:JSON.stringify({
+          name,
+          phone,
+          address
+        })
+      }
+    );
+
+    document
+      .getElementById(
+        "restaurantName"
+      ).value = "";
+
+    document
+      .getElementById(
+        "restaurantPhone"
+      ).value = "";
+
+    document
+      .getElementById(
+        "restaurantAddress"
+      ).value = "";
+
+    await Promise.all([
+      loadRestaurants(),
+      loadStats()
+    ]);
+
+    setMessage(
+      "تمت إضافة المطعم ✅"
+    );
+
+  }catch(error){
+
+    alert(error.message);
+
+  }
+
+}
+
+
+async function disableRestaurant(
+  id
+){
+
+  if(
+    !confirm(
+      "هل تريد تعطيل هذا المطعم؟"
+    )
+  ){
+    return;
+  }
+
+  try{
+
+    await api(
+      `/api/admin/restaurants/${id}`,
+      {
+        method:"DELETE"
+      }
+    );
+
+    await Promise.all([
+      loadRestaurants(),
+      loadProducts(),
+      loadStats()
+    ]);
+
+    setMessage(
+      "تم تعطيل المطعم"
+    );
+
+  }catch(error){
+
+    alert(error.message);
+
+  }
+
+}
+
+
+async function loadProducts(){
+
+  const data =
+    await api(
+      "/api/admin/products"
+    );
+
+  const box =
+    document
+      .getElementById(
+        "productsBox"
+      );
+
+  if(!data.length){
+
+    box.innerHTML =
+      `<div class="empty">
+        لا توجد منتجات
+      </div>`;
+
+    return;
+
+  }
+
+  box.innerHTML = `
+
+  <table>
+
+  <thead>
+
+  <tr>
+
+    <th>المنتج</th>
+
+    <th>التصنيف</th>
+
+    <th>السعر</th>
+
+    <th>المطعم</th>
+
+    <th>الحالة</th>
+
+    <th>إجراء</th>
+
+  </tr>
+
+  </thead>
+
+  <tbody>
+
+  ${data.map(p => `
+
+    <tr>
+
+      <td>
+        ${escapeHTML(
+          p.emoji ||
+          "🍽️"
+        )}
+        ${escapeHTML(
+          p.name
+        )}
+      </td>
+
+      <td>
+        ${escapeHTML(
+          p.category ||
+          "—"
+        )}
+      </td>
+
+      <td>
+        ${Number(
+          p.price
+        ).toLocaleString("ar-DZ")}
+        دج
+      </td>
+
+      <td>
+        ${escapeHTML(
+          p.restaurant ||
+          "—"
+        )}
+      </td>
+
+      <td>
+        ${p.active
+          ? "🟢 نشط"
+          : "🔴 متوقف"}
+      </td>
+
+      <td>
+
+      ${
+        p.active
+        ? `
+          <button
+            class="delete"
+            onclick="
+              disableProduct(
+                ${p.id}
+              )
+            "
+          >
+            تعطيل
+          </button>
+        `
+        : "—"
+      }
+
+      </td>
+
+    </tr>
+
+  `).join("")}
+
+  </tbody>
+
+  </table>
+
+  `;
+
+}
+
+
+async function addProduct(){
+
+  const name =
+    document
+      .getElementById(
+        "productName"
+      )
+      .value
+      .trim();
+
+  const category =
+    document
+      .getElementById(
+        "productCategory"
+      )
+      .value
+      .trim();
+
+  const price =
+    Number(
+      document
+        .getElementById(
+          "productPrice"
+        )
+        .value
+    );
+
+  const emoji =
+    document
+      .getElementById(
+        "productEmoji"
+      )
+      .value
+      .trim() ||
+      "🍽️";
+
+  const restaurant_id =
+    Number(
+      document
+        .getElementById(
+          "productRestaurant"
+        )
+        .value
+    );
+
+  if(!name){
+
+    return alert(
+      "دخل اسم المنتج"
+    );
+
+  }
+
+  if(!price || price <= 0){
+
+    return alert(
+      "دخل سعر صحيح"
+    );
+
+  }
+
+  if(
+    !restaurant_id
+  ){
+
+    return alert(
+      "اختار المطعم"
+    );
+
+  }
+
+  try{
+
+    await api(
+      "/api/admin/products",
+      {
+        method:"POST",
+        body:JSON.stringify({
+          name,
+          category,
+          price,
+          emoji,
+          restaurant_id
+        })
+      }
+    );
+
+    document
+      .getElementById(
+        "productName"
+      ).value = "";
+
+    document
+      .getElementById(
+        "productCategory"
+      ).value = "";
+
+    document
+      .getElementById(
+        "productPrice"
+      ).value = "";
+
+    document
+      .getElementById(
+        "productEmoji"
+      ).value = "";
+
+    await loadProducts();
+
+    setMessage(
+      "تمت إضافة المنتج ✅"
+    );
+
+  }catch(error){
+
+    alert(error.message);
+
+  }
+
+}
+
+
+async function disableProduct(
+  id
+){
+
+  if(
+    !confirm(
+      "هل تريد تعطيل هذا المنتج؟"
+    )
+  ){
+    return;
+  }
+
+  try{
+
+    await api(
+      `/api/admin/products/${id}`,
+      {
+        method:"DELETE"
+      }
+    );
+
+    await loadProducts();
+
+    setMessage(
+      "تم تعطيل المنتج"
+    );
+
+  }catch(error){
+
+    alert(error.message);
+
+  }
+
+}
+
+
+async function loadUsers(){
+
+  const data =
+    await api(
+      "/api/admin/users"
+    );
+
+  const box =
+    document
+      .getElementById(
+        "usersBox"
+      );
+
+  if(!data.length){
+
+    box.innerHTML =
+      `<div class="empty">
+        لا يوجد مستخدمون
+      </div>`;
+
+    return;
+
+  }
+
+  box.innerHTML = `
+
+  <table>
+
+  <thead>
+
+  <tr>
+
+    <th>الاسم</th>
+
+    <th>الهاتف</th>
+
+    <th>الدور</th>
+
+    <th>تغيير الدور</th>
+
+  </tr>
+
+  </thead>
+
+  <tbody>
+
+  ${data.map(u => `
+
+    <tr>
+
+      <td>
+        ${escapeHTML(
+          u.name
+        )}
+      </td>
+
+      <td>
+        ${escapeHTML(
+          u.phone
+        )}
+      </td>
+
+      <td>
+        ${escapeHTML(
+          u.role
+        )}
+      </td>
+
+      <td>
+
+        <select
+          onchange="
+            changeRole(
+              ${u.id},
+              this.value
+            )
+          "
+          ${u.id === getCurrentAdminId()
+            ? "disabled"
+            : ""}
+        >
+
+          <option
+            value="customer"
+            ${u.role === "customer"
+              ? "selected"
+              : ""}
+          >
+            زبون
+          </option>
+
+          <option
+            value="driver"
+            ${u.role === "driver"
+              ? "selected"
+              : ""}
+          >
+            سائق
+          </option>
+
+          <option
+            value="admin"
+            ${u.role === "admin"
+              ? "selected"
+              : ""}
+          >
+            Admin
+          </option>
+
+        </select>
+
+      </td>
+
+    </tr>
+
+  `).join("")}
+
+  </tbody>
+
+  </table>
+
+  `;
+
+}
+
+
+function getCurrentAdminId(){
+
+  try{
+
+    const payload =
+      JSON.parse(
+        atob(
+          token
+            .split(".")[1]
+            .replace(/-/g,"+")
+            .replace(/_/g,"/")
+        )
+      );
+
+    return Number(
+      payload.id
+    );
+
+  }catch{
+
+    return 0;
+
+  }
+
+}
+
+
+async function changeRole(
+  id,
+  role
+){
+
+  try{
+
+    await api(
+      `/api/admin/users/${id}/role`,
+      {
+        method:"PATCH",
+        body:JSON.stringify({
+          role
+        })
+      }
+    );
+
+    await loadUsers();
+
+    setMessage(
+      "تم تغيير صلاحية المستخدم ✅"
+    );
+
+  }catch(error){
+
+    alert(error.message);
+
+    await loadUsers();
+
+  }
+
+}
+
+
+async function checkAdmin(){
+
+  if(!token){
+
+    return false;
+
+  }
+
+  try{
+
+    const me =
+      await api(
+        "/api/me"
+      );
+
+    if(
+      me.role !== "admin"
+    ){
+
+      logout();
+
+      return false;
+
+    }
+
+    return true;
+
+  }catch{
+
+    logout();
+
+    return false;
+
+  }
+
+}
+
+
+document.addEventListener(
+  "DOMContentLoaded",
+  async () => {
+
+    if(
+      await checkAdmin()
+    ){
+
+      showDashboard();
+
+    }
+
+  }
+);
+
+</script>
+
+</body>
+</html>
