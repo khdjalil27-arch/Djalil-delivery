@@ -10,24 +10,29 @@
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:var(--g);color:#111}
 header{background:#111;color:#fff;padding:16px 5%;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
-.logo{font-size:23px;font-weight:900}.logo span{color:var(--y)}
+.logo{font-size:23px;font-weight:900}
+.logo span{color:var(--y)}
 button{border:0;border-radius:12px;padding:12px 18px;font-weight:800;cursor:pointer}
 .cart{background:var(--y)}
 .account{background:#fff;margin-left:8px}
+.account.logged{background:var(--y)}
 .hero{padding:55px 5%;background:#111;color:#fff;text-align:center}
-.hero h1{font-size:42px;margin:8px}.hero h1 span{color:var(--y)}
+.hero h1{font-size:42px;margin:8px}
+.hero h1 span{color:var(--y)}
 .hero p{color:#ccc}
 .search{max-width:650px;margin:25px auto 0;display:flex;background:#fff;border-radius:15px;overflow:hidden}
 .search input{flex:1;border:0;padding:16px;font-size:16px;outline:0}
 .search button{background:var(--y);border-radius:0}
 main{max-width:1200px;margin:auto;padding:30px 5%}
 .cats{display:flex;gap:10px;overflow:auto;padding-bottom:15px}
-.cat{background:#fff;white-space:nowrap}.cat.active{background:var(--y)}
+.cat{background:#fff;white-space:nowrap}
+.cat.active{background:var(--y)}
 h2{margin-top:28px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
 .card{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 5px 18px #0000000d}
 .pic{height:150px;background:#ddd;display:flex;align-items:center;justify-content:center;font-size:60px}
-.info{padding:15px}.info h3{margin:0 0 7px}
+.info{padding:15px}
+.info h3{margin:0 0 7px}
 .price{font-weight:900;font-size:19px}
 .row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:13px}
 .add{background:#111;color:#fff}
@@ -48,85 +53,202 @@ h2{margin-top:28px}
 .register{background:#111;color:#fff}
 .login{background:var(--y)}
 .close{background:#eee}
+.logout{background:#d00;color:#fff}
+.userinfo{background:#f5f5f5;padding:12px;border-radius:12px;margin:10px 0;display:none}
 footer{text-align:center;padding:30px;background:#111;color:#aaa;margin-top:30px}
-@media(max-width:600px){.hero h1{font-size:31px}.hero{padding:38px 5%}}
+.loading{text-align:center;padding:40px;color:#777}
+.error{color:#b00020;text-align:center;padding:30px}
+
+@media(max-width:600px){
+.hero h1{font-size:31px}
+.hero{padding:38px 5%}
+header{padding:12px 3%}
+.logo{font-size:18px}
+button{padding:10px 12px}
+}
 </style>
 </head>
 
 <body>
 
 <header>
-<div class="logo">DJALIL <span>DELIVERY</span></div>
-<div>
-<button class="account" onclick="openAuth()">👤 حسابي</button>
-<button class="cart" onclick="openCart()">🛒 السلة (<span id="count">0</span>)</button>
+
+<div class="logo">
+DJALIL <span>DELIVERY</span>
 </div>
+
+<div>
+
+<button
+id="accountBtn"
+class="account"
+onclick="openAuth()">
+👤 حسابي
+</button>
+
+<button
+class="cart"
+onclick="openCart()">
+🛒 السلة (<span id="count">0</span>)
+</button>
+
+</div>
+
 </header>
 
 <section class="hero">
-<h1>وش حاب <span>تاكل اليوم؟</span> 🍔</h1>
-<p>اطلب من مطاعمك المفضلة وخلي Djalil Delivery يوصلهالك</p>
+
+<h1>
+وش حاب <span>تاكل اليوم؟</span> 🍔
+</h1>
+
+<p>
+اطلب من مطاعمك المفضلة وخلي Djalil Delivery يوصلهالك
+</p>
+
 <div class="search">
-<input id="search" placeholder="ابحث عن بيتزا، برغر، كريب..." oninput="render()">
-<button>بحث</button>
+
+<input
+id="search"
+placeholder="ابحث عن بيتزا، برغر، كريب..."
+oninput="render()">
+
+<button type="button">بحث</button>
+
 </div>
+
 </section>
 
 <main>
+
 <h2>التصنيفات</h2>
-<div class="cats" id="cats"></div>
+
+<div
+class="cats"
+id="cats">
+</div>
 
 <h2>الأكثر طلباً 🔥</h2>
-<div class="grid" id="products"></div>
+
+<div
+class="grid"
+id="products">
+
+<div class="loading">
+جاري تحميل المنتجات...
+</div>
+
+</div>
+
 </main>
 
-<div class="overlay" id="overlay" onclick="closeCart()"></div>
+<div
+class="overlay"
+id="overlay"
+onclick="closeCart()">
+</div>
 
-<aside class="panel" id="panel">
+<aside
+class="panel"
+id="panel">
+
 <h2>🛒 سلة الطلب</h2>
+
 <div id="cartItems"></div>
 
 <div class="total">
-المجموع: <span id="total">0</span> دج
+المجموع:
+<span id="total">0</span> دج
 </div>
 
 <div class="form">
-<h3>معلومات التوصيل</h3>
-<input id="name" placeholder="الاسم الكامل">
-<input id="phone" placeholder="رقم الهاتف">
-<input id="address" placeholder="العنوان بالتفصيل">
 
-<button class="checkout" onclick="order()">
+<h3>معلومات التوصيل</h3>
+
+<input
+id="name"
+placeholder="الاسم الكامل">
+
+<input
+id="phone"
+placeholder="رقم الهاتف"
+inputmode="tel">
+
+<input
+id="address"
+placeholder="العنوان بالتفصيل">
+
+<button
+class="checkout"
+onclick="order()">
 تأكيد الطلب
 </button>
+
 </div>
+
 </aside>
 
-<!-- تسجيل الدخول -->
-<div class="auth" id="auth">
+<!-- AUTH -->
+
+<div
+class="auth"
+id="auth">
+
 <div class="authbox">
 
 <h2>👤 حساب Djalil Delivery</h2>
 
-<input id="authName" placeholder="الاسم الكامل">
+<div
+class="userinfo"
+id="userinfo">
+</div>
 
-<input id="authPhone" placeholder="رقم الهاتف">
+<div id="authForm">
 
-<input id="authPassword" type="password" placeholder="كلمة السر">
+<input
+id="authName"
+placeholder="الاسم الكامل">
 
-<button class="register" onclick="registerUser()">
+<input
+id="authPhone"
+placeholder="رقم الهاتف"
+inputmode="tel">
+
+<input
+id="authPassword"
+type="password"
+placeholder="كلمة السر">
+
+<button
+class="register"
+onclick="registerUser()">
 إنشاء حساب
 </button>
 
-<button class="login" onclick="loginUser()">
+<button
+class="login"
+onclick="loginUser()">
 تسجيل الدخول
 </button>
 
-<button class="close" onclick="closeAuth()">
+</div>
+
+<button
+class="logout"
+id="logoutBtn"
+onclick="logout()"
+style="display:none">
+🚪 تسجيل الخروج
+</button>
+
+<button
+class="close"
+onclick="closeAuth()">
 إغلاق
 </button>
 
 </div>
+
 </div>
 
 <footer>
@@ -135,255 +257,917 @@ footer{text-align:center;padding:30px;background:#111;color:#aaa;margin-top:30px
 
 <script>
 
-const API="";
+const API = "";
 
-const products=[
-{id:1,n:"Classic Burger",c:"برغر",p:650,e:"🍔"},
-{id:2,n:"Double Cheese",c:"برغر",p:850,e:"🍔"},
-{id:3,n:"Pizza Margherita",c:"بيتزا",p:900,e:"🍕"},
-{id:4,n:"Pizza 4 Fromages",c:"بيتزا",p:1200,e:"🍕"},
-{id:5,n:"Crêpe Choko",c:"كريب",p:550,e:"🥞"},
-{id:6,n:"Crêpe Bueno",c:"كريب",p:750,e:"🥞"},
-{id:7,n:"Tacos Poulet",c:"تاكوس",p:700,e:"🌯"},
-{id:8,n:"Chicken Box",c:"دجاج",p:800,e:"🍗"},
-{id:9,n:"Frites",c:"إضافات",p:250,e:"🍟"},
-{id:10,n:"Coca Cola",c:"مشروبات",p:150,e:"🥤"}
-];
+let products = [];
+let cat = "الكل";
+let cart = [];
 
-let cat="الكل";
-let cart=[];
+
+/* =========================
+   AUTH
+========================= */
+
+function getToken(){
+    return localStorage.getItem("token");
+}
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+function logout(){
+
+    localStorage.removeItem("token");
+
+    updateAccountUI();
+
+    alert("تم تسجيل الخروج بنجاح");
+
+    closeAuth();
+
+}
+
+
+/* =========================
+   OPEN AUTH
+========================= */
 
 function openAuth(){
-document.getElementById("auth").classList.add("open");
+
+    updateAccountUI();
+
+    document
+        .getElementById("auth")
+        .classList.add("open");
+
 }
 
+
+/* =========================
+   CLOSE AUTH
+========================= */
+
 function closeAuth(){
-document.getElementById("auth").classList.remove("open");
+
+    document
+        .getElementById("auth")
+        .classList.remove("open");
+
 }
+
+
+/* =========================
+   ACCOUNT UI
+========================= */
+
+function updateAccountUI(){
+
+    const token = getToken();
+
+    const btn = document.getElementById("accountBtn");
+    const authForm = document.getElementById("authForm");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const userinfo = document.getElementById("userinfo");
+
+    if(token){
+
+        btn.textContent = "👤 حسابي ✓";
+        btn.classList.add("logged");
+
+        authForm.style.display = "none";
+        logoutBtn.style.display = "block";
+        userinfo.style.display = "block";
+
+        userinfo.textContent =
+            "أنت مسجل الدخول حالياً 🔐";
+
+    }else{
+
+        btn.textContent = "👤 حسابي";
+        btn.classList.remove("logged");
+
+        authForm.style.display = "block";
+        logoutBtn.style.display = "none";
+        userinfo.style.display = "none";
+
+    }
+
+}
+
+
+/* =========================
+   CHECK SESSION
+========================= */
+
+async function checkSession(){
+
+    const token = getToken();
+
+    if(!token){
+
+        updateAccountUI();
+        return false;
+
+    }
+
+    try{
+
+        const res = await fetch(
+            API + "/api/orders",
+            {
+                method:"GET",
+                headers:{
+                    "Authorization":"Bearer " + token
+                }
+            }
+        );
+
+        if(res.status === 401){
+
+            localStorage.removeItem("token");
+
+            updateAccountUI();
+
+            return false;
+
+        }
+
+        if(!res.ok){
+
+            return false;
+
+        }
+
+        return true;
+
+    }catch(error){
+
+        console.error("Session error:", error);
+
+        return false;
+
+    }
+
+}
+
+
+/* =========================
+   REGISTER
+========================= */
 
 async function registerUser(){
 
-const name=document.getElementById("authName").value.trim();
-const phone=document.getElementById("authPhone").value.trim();
-const password=document.getElementById("authPassword").value;
+    const name =
+        document.getElementById("authName").value.trim();
 
-if(!name||!phone||!password){
-return alert("عمّر المعلومات كاملة");
+    const phone =
+        document.getElementById("authPhone").value.trim();
+
+    const password =
+        document.getElementById("authPassword").value;
+
+
+    if(!name || !phone || !password){
+
+        alert("عمّر المعلومات كاملة");
+        return;
+
+    }
+
+
+    if(password.length < 8){
+
+        alert("كلمة السر لازم تكون 8 أحرف على الأقل");
+        return;
+
+    }
+
+
+    try{
+
+        const res = await fetch(
+            API + "/api/register",
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+                    name:name,
+                    phone:phone,
+                    password:password
+                })
+            }
+        );
+
+
+        const data = await res.json();
+
+
+        if(!res.ok){
+
+            alert(data.error || "حدث خطأ أثناء إنشاء الحساب");
+            return;
+
+        }
+
+
+        localStorage.setItem(
+            "token",
+            data.token
+        );
+
+
+        document.getElementById("name").value =
+            data.user.name;
+
+        document.getElementById("phone").value =
+            data.user.phone;
+
+
+        updateAccountUI();
+
+        closeAuth();
+
+        alert("تم إنشاء حسابك بنجاح 🎉");
+
+    }catch(error){
+
+        console.error(error);
+
+        alert("تعذر الاتصال بالخادم");
+
+    }
+
 }
 
-const res=await fetch(API+"/api/register",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({name,phone,password})
-});
 
-const data=await res.json();
-
-if(!res.ok){
-return alert(data.error||"حدث خطأ");
-}
-
-localStorage.setItem("token",data.token);
-
-alert("تم إنشاء حسابك بنجاح 🎉");
-
-closeAuth();
-}
+/* =========================
+   LOGIN
+========================= */
 
 async function loginUser(){
 
-const phone=document.getElementById("authPhone").value.trim();
-const password=document.getElementById("authPassword").value;
+    const phone =
+        document.getElementById("authPhone").value.trim();
 
-if(!phone||!password){
-return alert("دخل رقم الهاتف وكلمة السر");
+    const password =
+        document.getElementById("authPassword").value;
+
+
+    if(!phone || !password){
+
+        alert("دخل رقم الهاتف وكلمة السر");
+        return;
+
+    }
+
+
+    try{
+
+        const res = await fetch(
+            API + "/api/login",
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+                    phone:phone,
+                    password:password
+                })
+            }
+        );
+
+
+        const data = await res.json();
+
+
+        if(!res.ok){
+
+            alert(
+                data.error ||
+                "بيانات الدخول خاطئة"
+            );
+
+            return;
+
+        }
+
+
+        if(!data.token){
+
+            alert("الخادم لم يرجع رمز الدخول");
+            return;
+
+        }
+
+
+        localStorage.setItem(
+            "token",
+            data.token
+        );
+
+
+        if(data.user){
+
+            document.getElementById("name").value =
+                data.user.name || "";
+
+            document.getElementById("phone").value =
+                data.user.phone || "";
+
+        }
+
+
+        updateAccountUI();
+
+        closeAuth();
+
+        alert(
+            "مرحبا بيك " +
+            (data.user?.name || "") +
+            " 🎉"
+        );
+
+    }catch(error){
+
+        console.error(error);
+
+        alert("تعذر الاتصال بالخادم");
+
+    }
+
 }
 
-const res=await fetch(API+"/api/login",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({phone,password})
-});
 
-const data=await res.json();
+/* =========================
+   LOAD PRODUCTS
+========================= */
 
-if(!res.ok){
-return alert(data.error||"بيانات الدخول خاطئة");
+async function loadProducts(){
+
+    const box =
+        document.getElementById("products");
+
+    box.innerHTML =
+        '<div class="loading">جاري تحميل المنتجات...</div>';
+
+    try{
+
+        const res = await fetch(
+            API + "/api/products",
+            {
+                method:"GET"
+            }
+        );
+
+
+        if(!res.ok){
+
+            throw new Error(
+                "Products request failed"
+            );
+
+        }
+
+
+        const data = await res.json();
+
+
+        if(!Array.isArray(data)){
+
+            throw new Error(
+                "Invalid products data"
+            );
+
+        }
+
+
+        products = data;
+
+        render();
+
+    }catch(error){
+
+        console.error(error);
+
+        box.innerHTML = `
+            <div class="error">
+                تعذر تحميل المنتجات.
+                <br><br>
+                حاول تحديث الصفحة.
+            </div>
+        `;
+
+    }
+
 }
 
-localStorage.setItem("token",data.token);
 
-alert("مرحبا بيك "+data.user.name+" 🎉");
-
-closeAuth();
-}
+/* =========================
+   CATEGORIES
+========================= */
 
 function renderCats(){
 
-let cats=["الكل",...new Set(products.map(x=>x.c))];
+    const cats = [
+        "الكل",
+        ...new Set(
+            products
+                .map(x => x.category)
+                .filter(Boolean)
+        )
+    ];
 
-document.getElementById("cats").innerHTML=
-cats.map(x=>`
-<button class="cat ${x==cat?'active':''}"
-onclick="cat='${x}';render()">
-${x}
-</button>
-`).join("");
+
+    document.getElementById("cats").innerHTML =
+
+        cats.map(x => `
+
+            <button
+                class="cat ${x === cat ? "active" : ""}"
+                onclick="selectCategory(${JSON.stringify(x)})">
+
+                ${escapeHTML(x)}
+
+            </button>
+
+        `).join("");
+
 }
+
+
+function selectCategory(value){
+
+    cat = value;
+
+    render();
+
+}
+
+
+/* =========================
+   PRODUCTS
+========================= */
 
 function render(){
 
-renderCats();
+    renderCats();
 
-let q=document.getElementById("search").value.toLowerCase();
 
-let list=products.filter(x=>
-(cat=="الكل"||x.c==cat)&&
-x.n.toLowerCase().includes(q)
-);
+    const searchInput =
+        document.getElementById("search");
 
-document.getElementById("products").innerHTML=
-list.map(x=>`
-<div class="card">
-<div class="pic">${x.e}</div>
+    const q =
+        searchInput
+            ? searchInput.value.toLowerCase().trim()
+            : "";
 
-<div class="info">
-<h3>${x.n}</h3>
-<small>${x.c}</small>
 
-<div class="row">
-<span class="price">${x.p} دج</span>
+    const list = products.filter(x =>
 
-<button class="add" onclick="add(${x.id})">
-+ أضف
-</button>
+        (cat === "الكل" || x.category === cat) &&
 
-</div>
-</div>
-</div>
-`).join("");
+        String(x.name || "")
+            .toLowerCase()
+            .includes(q)
+
+    );
+
+
+    document.getElementById("products").innerHTML =
+
+        list.length ?
+
+        list.map(x => `
+
+            <div class="card">
+
+                <div class="pic">
+                    ${escapeHTML(x.emoji || "🍽️")}
+                </div>
+
+                <div class="info">
+
+                    <h3>
+                        ${escapeHTML(x.name)}
+                    </h3>
+
+                    <small>
+                        ${escapeHTML(x.category || "")}
+                    </small>
+
+                    <div class="row">
+
+                        <span class="price">
+                            ${Number(x.price) || 0} دج
+                        </span>
+
+                        <button
+                            class="add"
+                            onclick="add(${Number(x.id)})">
+
+                            + أضف
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        `).join("")
+
+        :
+
+        `
+            <div class="loading">
+                ما لقيناش منتجات.
+            </div>
+        `;
+
 }
+
+
+/* =========================
+   SAFE HTML
+========================= */
+
+function escapeHTML(value){
+
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+
+
+/* =========================
+   CART
+========================= */
 
 function add(id){
 
-let x=cart.find(i=>i.id==id);
+    const product =
+        products.find(x => Number(x.id) === Number(id));
 
-x?x.q++:cart.push({
-...products.find(i=>i.id==id),
-q:1
-});
 
-update();
-openCart();
+    if(!product){
+
+        alert("المنتج غير موجود");
+        return;
+
+    }
+
+
+    let item =
+        cart.find(x => Number(x.id) === Number(id));
+
+
+    if(item){
+
+        if(item.q >= 20){
+
+            alert("الحد الأقصى 20 قطعة من نفس المنتج");
+            return;
+
+        }
+
+        item.q++;
+
+    }else{
+
+        cart.push({
+            ...product,
+            q:1
+        });
+
+    }
+
+
+    update();
+
+    openCart();
+
 }
+
+
+/* =========================
+   UPDATE CART
+========================= */
 
 function update(){
 
-document.getElementById("count").textContent=
-cart.reduce((a,x)=>a+x.q,0);
+    const count =
+        cart.reduce(
+            (sum,x) => sum + x.q,
+            0
+        );
 
-document.getElementById("cartItems").innerHTML=
-cart.length?
 
-cart.map(x=>`
-<div class="item">
-<div>
-${x.e} ${x.n}<br>
-<small>${x.p} دج × ${x.q}</small>
-</div>
+    document.getElementById("count").textContent =
+        count;
 
-<button onclick="removeItem(${x.id})">
-حذف
-</button>
-</div>
-`).join("")
 
-:
-'<div class="empty">السلة فارغة</div>';
+    document.getElementById("cartItems").innerHTML =
 
-document.getElementById("total").textContent=
-cart.reduce((a,x)=>a+x.p*x.q,0);
+        cart.length ?
+
+        cart.map(x => `
+
+            <div class="item">
+
+                <div>
+
+                    ${escapeHTML(x.emoji || "🍽️")}
+                    ${escapeHTML(x.name)}
+
+                    <br>
+
+                    <small>
+                        ${Number(x.price) || 0} دج × ${x.q}
+                    </small>
+
+                </div>
+
+                <button
+                    onclick="removeItem(${Number(x.id)})">
+
+                    حذف
+
+                </button>
+
+            </div>
+
+        `).join("")
+
+        :
+
+        '<div class="empty">السلة فارغة</div>';
+
+
+    const total =
+        cart.reduce(
+            (sum,x) =>
+                sum + ((Number(x.price) || 0) * x.q),
+            0
+        );
+
+
+    document.getElementById("total").textContent =
+        total;
+
 }
+
+
+/* =========================
+   REMOVE
+========================= */
 
 function removeItem(id){
 
-cart=cart.filter(x=>x.id!=id);
+    cart =
+        cart.filter(
+            x => Number(x.id) !== Number(id)
+        );
 
-update();
+    update();
+
 }
+
+
+/* =========================
+   CART OPEN
+========================= */
 
 function openCart(){
 
-document.getElementById("panel").classList.add("open");
-document.getElementById("overlay").classList.add("open");
+    document
+        .getElementById("panel")
+        .classList.add("open");
 
-update();
+    document
+        .getElementById("overlay")
+        .classList.add("open");
+
+    update();
+
 }
+
+
+/* =========================
+   CART CLOSE
+========================= */
 
 function closeCart(){
 
-document.getElementById("panel").classList.remove("open");
-document.getElementById("overlay").classList.remove("open");
+    document
+        .getElementById("panel")
+        .classList.remove("open");
+
+    document
+        .getElementById("overlay")
+        .classList.remove("open");
+
 }
+
+
+/* =========================
+   ORDER
+========================= */
 
 async function order(){
 
-if(!cart.length){
-return alert("السلة فارغة");
+    if(!cart.length){
+
+        alert("السلة فارغة");
+        return;
+
+    }
+
+
+    const session =
+        await checkSession();
+
+
+    if(!session){
+
+        closeCart();
+
+        openAuth();
+
+        alert(
+            "لازم تسجل الدخول أولاً"
+        );
+
+        return;
+
+    }
+
+
+    const token =
+        getToken();
+
+
+    if(!token){
+
+        alert("سجل الدخول أولاً");
+        return;
+
+    }
+
+
+    const name =
+        document.getElementById("name")
+            .value.trim();
+
+    const phone =
+        document.getElementById("phone")
+            .value.trim();
+
+    const address =
+        document.getElementById("address")
+            .value.trim();
+
+
+    if(!name || !phone || !address){
+
+        alert(
+            "عمّر معلومات التوصيل كاملة"
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        const res = await fetch(
+            API + "/api/orders",
+            {
+                method:"POST",
+
+                headers:{
+                    "Content-Type":"application/json",
+                    "Authorization":"Bearer " + token
+                },
+
+                body:JSON.stringify({
+
+                    items:cart.map(x => ({
+                        id:Number(x.id),
+                        q:Number(x.q)
+                    })),
+
+                    address:address,
+                    phone:phone
+
+                })
+
+            }
+        );
+
+
+        const data =
+            await res.json();
+
+
+        if(res.status === 401){
+
+            localStorage.removeItem("token");
+
+            updateAccountUI();
+
+            alert(
+                "انتهت جلسة الدخول. سجل الدخول من جديد."
+            );
+
+            closeCart();
+
+            openAuth();
+
+            return;
+
+        }
+
+
+        if(!res.ok){
+
+            alert(
+                data.error ||
+                "تعذر تسجيل الطلب"
+            );
+
+            return;
+
+        }
+
+
+        alert(
+            "تم تسجيل طلبك بنجاح 🎉\n" +
+            "رقم الطلب: #" +
+            data.id +
+            "\nالمجموع مع التوصيل: " +
+            data.total +
+            " دج"
+        );
+
+
+        cart = [];
+
+        update();
+
+        closeCart();
+
+
+    }catch(error){
+
+        console.error(error);
+
+        alert(
+            "تعذر الاتصال بالخادم"
+        );
+
+    }
+
 }
 
-const token=localStorage.getItem("token");
 
-if(!token){
-closeCart();
-openAuth();
-return alert("لازم تسجل الدخول أولاً");
-}
+/* =========================
+   START
+========================= */
 
-const name=document.getElementById("name").value.trim();
-const phone=document.getElementById("phone").value.trim();
-const address=document.getElementById("address").value.trim();
+document.addEventListener(
+    "DOMContentLoaded",
+    async function(){
 
-if(!name||!phone||!address){
-return alert("عمّر معلومات التوصيل كاملة");
-}
+        updateAccountUI();
 
-const res=await fetch(API+"/api/orders",{
-method:"POST",
+        update();
 
-headers:{
-"Content-Type":"application/json",
-"Authorization":"Bearer "+token
-},
+        await loadProducts();
 
-body:JSON.stringify({
-items:cart.map(x=>({
-id:x.id,
-q:x.q
-})),
-address,
-phone
-})
-});
+        /*
+         * نتحقق من الجلسة فقط إذا كان عندنا Token.
+         * هذا يمنع طلب /api/orders بدون داعي.
+         */
 
-const data=await res.json();
+        if(getToken()){
 
-if(!res.ok){
-return alert(data.error||"تعذر تسجيل الطلب");
-}
+            await checkSession();
 
-alert(
-"تم تسجيل طلبك بنجاح 🎉\n"+
-"رقم الطلب: #"+data.id+"\n"+
-"المجموع مع التوصيل: "+data.total+" دج"
+        }
+
+    }
 );
-
-cart=[];
-update();
-closeCart();
-}
-
-render();
 
 </script>
 
