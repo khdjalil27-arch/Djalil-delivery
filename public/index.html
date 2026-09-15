@@ -1,113 +1,652 @@
-<!DOCTYPE html>
-<html lang="fr">
+<!doctype html>
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Djalil Delivery</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Djalil Delivery</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-    }
+<style>
+:root{
+  --y:#ffd21c;
+  --b:#111;
+  --g:#f5f5f5;
+  --w:#fff;
+  --mut:#777
+}
 
-    body {
-      background: #f5f5f5;
-      color: #222;
-    }
+*{box-sizing:border-box}
 
-    header {
-      background: #111;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--g);
+  color:#111
+}
 
-    header h1 {
-      font-size: 28px;
-    }
+header{
+  background:#111;
+  color:#fff;
+  padding:16px 5%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  position:sticky;
+  top:0;
+  z-index:5
+}
 
-    header p {
-      margin-top: 8px;
-      color: #ccc;
-    }
+.logo{
+  font-size:23px;
+  font-weight:900
+}
 
-    .container {
-      max-width: 600px;
-      margin: 20px auto;
-      padding: 15px;
-    }
+.logo span{
+  color:var(--y)
+}
 
-    .card {
-      background: white;
-      padding: 20px;
-      margin-bottom: 15px;
-      border-radius: 15px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-    }
+button{
+  border:0;
+  border-radius:12px;
+  padding:12px 18px;
+  font-weight:800;
+  cursor:pointer
+}
 
-    .card h2 {
-      margin-bottom: 10px;
-    }
+.cart{
+  background:var(--y);
+  color:#111
+}
 
-    .btn {
-      display: block;
-      width: 100%;
-      padding: 14px;
-      margin-top: 12px;
-      border: none;
-      border-radius: 10px;
-      background: #f5c400;
-      color: #111;
-      font-size: 17px;
-      font-weight: bold;
-      text-align: center;
-      text-decoration: none;
-      cursor: pointer;
-    }
+.hero{
+  padding:55px 5%;
+  background:#111;
+  color:#fff;
+  text-align:center
+}
 
-    footer {
-      text-align: center;
-      padding: 25px;
-      color: #777;
-    }
-  </style>
+.hero h1{
+  font-size:42px;
+  margin:8px
+}
+
+.hero h1 span{
+  color:var(--y)
+}
+
+.hero p{
+  color:#ccc
+}
+
+.search{
+  max-width:650px;
+  margin:25px auto 0;
+  display:flex;
+  background:#fff;
+  border-radius:15px;
+  overflow:hidden
+}
+
+.search input{
+  flex:1;
+  border:0;
+  padding:16px;
+  font-size:16px;
+  outline:0
+}
+
+.search button{
+  background:var(--y);
+  border-radius:0
+}
+
+main{
+  max-width:1200px;
+  margin:auto;
+  padding:30px 5%
+}
+
+.cats{
+  display:flex;
+  gap:10px;
+  overflow:auto;
+  padding-bottom:15px
+}
+
+.cat{
+  background:#fff;
+  white-space:nowrap
+}
+
+.cat.active{
+  background:var(--y)
+}
+
+h2{
+  margin-top:28px
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:18px
+}
+
+.card{
+  background:#fff;
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 5px 18px #0000000d
+}
+
+.pic{
+  height:150px;
+  background:#ddd;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:60px
+}
+
+.info{
+  padding:15px
+}
+
+.info h3{
+  margin:0 0 7px
+}
+
+.price{
+  font-weight:900;
+  font-size:19px
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  margin-top:13px
+}
+
+.add{
+  background:#111;
+  color:#fff
+}
+
+.panel{
+  position:fixed;
+  right:-420px;
+  top:0;
+  width:min(420px,100%);
+  height:100%;
+  background:#fff;
+  z-index:10;
+  transition:.3s;
+  padding:20px;
+  overflow:auto;
+  box-shadow:-5px 0 20px #0002
+}
+
+.panel.open{
+  right:0
+}
+
+.overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#0007;
+  z-index:9
+}
+
+.overlay.open{
+  display:block
+}
+
+.item{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  border-bottom:1px solid #eee;
+  padding:12px 0
+}
+
+.total{
+  font-size:22px;
+  font-weight:900;
+  margin:20px 0
+}
+
+.form input,
+.form select{
+  width:100%;
+  padding:13px;
+  margin:7px 0;
+  border:1px solid #ddd;
+  border-radius:10px
+}
+
+.checkout{
+  width:100%;
+  background:var(--y)
+}
+
+.empty{
+  text-align:center;
+  color:var(--mut);
+  padding:50px 0
+}
+
+footer{
+  text-align:center;
+  padding:30px;
+  background:#111;
+  color:#aaa;
+  margin-top:30px
+}
+
+@media(max-width:600px){
+  .hero h1{
+    font-size:31px
+  }
+
+  .hero{
+    padding:38px 5%
+  }
+}
+</style>
 </head>
 
 <body>
 
-  <header>
-    <h1>🚚 Djalil Delivery</h1>
-    <p>Livraison rapide et fiable</p>
-  </header>
+<header>
+  <div class="logo">DJALIL <span>DELIVERY</span></div>
+  <button class="cart" onclick="openCart()">
+    🛒 السلة (<span id="count">0</span>)
+  </button>
+</header>
 
-  <div class="container">
+<section class="hero">
 
-    <div class="card">
-      <h2>🍔 Commander</h2>
-      <p>Commandez votre repas facilement.</p>
-      <a href="#" class="btn">Commander maintenant</a>
-    </div>
+  <h1>وش حاب <span>تاكل اليوم؟</span> 🍔</h1>
 
-    <div class="card">
-      <h2>📦 Livraison</h2>
-      <p>Suivez votre commande et recevez-la rapidement.</p>
-      <a href="#" class="btn">Voir les livraisons</a>
-    </div>
+  <p>
+    اطلب من مطاعمك المفضلة وخلي Djalil Delivery يوصلهالك
+  </p>
 
-    <div class="card">
-      <h2>📞 Contact</h2>
-      <p>Besoin d'aide ? Contactez-nous.</p>
-      <a href="tel:+213000000000" class="btn">Nous contacter</a>
-    </div>
+  <div class="search">
+    <input
+      id="search"
+      placeholder="ابحث عن بيتزا، برغر، كريب..."
+      oninput="render()"
+    >
+
+    <button>بحث</button>
+  </div>
+
+</section>
+
+<main>
+
+  <h2>التصنيفات</h2>
+
+  <div class="cats" id="cats"></div>
+
+  <h2>الأكثر طلباً 🔥</h2>
+
+  <div class="grid" id="products"></div>
+
+</main>
+
+<div
+  class="overlay"
+  id="overlay"
+  onclick="closeCart()">
+</div>
+
+<aside class="panel" id="panel">
+
+  <h2>🛒 سلة الطلب</h2>
+
+  <div id="cartItems"></div>
+
+  <div class="total">
+    المجموع:
+    <span id="total">0</span>
+    دج
+  </div>
+
+  <div class="form">
+
+    <h3>معلومات التوصيل</h3>
+
+    <input
+      id="name"
+      placeholder="الاسم الكامل"
+    >
+
+    <input
+      id="phone"
+      placeholder="رقم الهاتف"
+    >
+
+    <input
+      id="address"
+      placeholder="العنوان بالتفصيل"
+    >
+
+    <select id="payment">
+      <option>الدفع عند الاستلام</option>
+      <option>الدفع الإلكتروني (قريباً)</option>
+    </select>
+
+    <button
+      class="checkout"
+      onclick="order()">
+      تأكيد الطلب
+    </button>
 
   </div>
 
-  <footer>
-    © 2026 Djalil Delivery
-  </footer>
+</aside>
+
+<footer>
+  © 2026 Djalil Delivery — الجزائر 🇩🇿
+</footer>
+
+<script>
+
+const products = [
+
+  {
+    id:1,
+    n:"Classic Burger",
+    c:"برغر",
+    p:650,
+    e:"🍔"
+  },
+
+  {
+    id:2,
+    n:"Double Cheese",
+    c:"برغر",
+    p:850,
+    e:"🍔"
+  },
+
+  {
+    id:3,
+    n:"Pizza Margherita",
+    c:"بيتزا",
+    p:900,
+    e:"🍕"
+  },
+
+  {
+    id:4,
+    n:"Pizza 4 Fromages",
+    c:"بيتزا",
+    p:1200,
+    e:"🍕"
+  },
+
+  {
+    id:5,
+    n:"Crêpe Choko",
+    c:"كريب",
+    p:550,
+    e:"🥞"
+  },
+
+  {
+    id:6,
+    n:"Crêpe Bueno",
+    c:"كريب",
+    p:750,
+    e:"🥞"
+  },
+
+  {
+    id:7,
+    n:"Tacos Poulet",
+    c:"تاكوس",
+    p:700,
+    e:"🌯"
+  },
+
+  {
+    id:8,
+    n:"Chicken Box",
+    c:"دجاج",
+    p:800,
+    e:"🍗"
+  },
+
+  {
+    id:9,
+    n:"Frites",
+    c:"إضافات",
+    p:250,
+    e:"🍟"
+  },
+
+  {
+    id:10,
+    n:"Coca Cola",
+    c:"مشروبات",
+    p:150,
+    e:"🥤"
+  }
+
+];
+
+let cat = "الكل";
+let cart = [];
+
+function renderCats(){
+
+  let cats = [
+    "الكل",
+    ...new Set(products.map(x => x.c))
+  ];
+
+  document.getElementById("cats").innerHTML =
+    cats.map(x => `
+      <button
+        class="cat ${x == cat ? 'active' : ''}"
+        onclick="cat='${x}';render()">
+        ${x}
+      </button>
+    `).join("");
+
+}
+
+function render(){
+
+  renderCats();
+
+  let q =
+    document
+      .getElementById("search")
+      .value
+      .toLowerCase();
+
+  let list =
+    products.filter(x =>
+      (cat == "الكل" || x.c == cat) &&
+      x.n.toLowerCase().includes(q)
+    );
+
+  document.getElementById("products").innerHTML =
+    list.map(x => `
+
+      <div class="card">
+
+        <div class="pic">
+          ${x.e}
+        </div>
+
+        <div class="info">
+
+          <h3>${x.n}</h3>
+
+          <small>${x.c}</small>
+
+          <div class="row">
+
+            <span class="price">
+              ${x.p} دج
+            </span>
+
+            <button
+              class="add"
+              onclick="add(${x.id})">
+              + أضف
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    `).join("");
+
+}
+
+function add(id){
+
+  let x =
+    cart.find(i => i.id == id);
+
+  if(x){
+
+    x.q++;
+
+  }else{
+
+    cart.push({
+      ...products.find(i => i.id == id),
+      q:1
+    });
+
+  }
+
+  update();
+  openCart();
+
+}
+
+function update(){
+
+  document.getElementById("count").textContent =
+    cart.reduce((a,x) => a + x.q,0);
+
+  document.getElementById("cartItems").innerHTML =
+    cart.length
+
+    ? cart.map(x => `
+
+      <div class="item">
+
+        <div>
+          ${x.e} ${x.n}
+          <br>
+          <small>
+            ${x.p} دج × ${x.q}
+          </small>
+        </div>
+
+        <button
+          onclick="remove(${x.id})">
+          حذف
+        </button>
+
+      </div>
+
+    `).join("")
+
+    : '<div class="empty">السلة فارغة</div>';
+
+  document.getElementById("total").textContent =
+    cart.reduce(
+      (a,x) => a + x.p * x.q,
+      0
+    );
+
+}
+
+function remove(id){
+
+  cart =
+    cart.filter(x => x.id != id);
+
+  update();
+
+}
+
+function openCart(){
+
+  document
+    .getElementById("panel")
+    .classList.add("open");
+
+  document
+    .getElementById("overlay")
+    .classList.add("open");
+
+  update();
+
+}
+
+function closeCart(){
+
+  document
+    .getElementById("panel")
+    .classList.remove("open");
+
+  document
+    .getElementById("overlay")
+    .classList.remove("open");
+
+}
+
+function order(){
+
+  if(!cart.length){
+
+    return alert("السلة فارغة");
+
+  }
+
+  if(
+    !name.value ||
+    !phone.value ||
+    !address.value
+  ){
+
+    return alert(
+      "عمّر معلومات التوصيل كاملة"
+    );
+
+  }
+
+  alert(
+    "تم تسجيل طلبك بنجاح 🎉\n" +
+    "Djalil Delivery راح يتواصل معاك لتأكيد الطلب."
+  );
+
+  cart = [];
+
+  update();
+
+  closeCart();
+
+}
+
+render();
+
+</script>
 
 </body>
 </html>
