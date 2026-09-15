@@ -6,642 +6,381 @@
 <title>Djalil Delivery</title>
 
 <style>
-:root{
-  --y:#ffd21c;
-  --b:#111;
-  --g:#f5f5f5;
-  --w:#fff;
-  --mut:#777
-}
-
+:root{--y:#ffd21c;--b:#111;--g:#f5f5f5;--w:#fff}
 *{box-sizing:border-box}
-
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:var(--g);
-  color:#111
-}
-
-header{
-  background:#111;
-  color:#fff;
-  padding:16px 5%;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  position:sticky;
-  top:0;
-  z-index:5
-}
-
-.logo{
-  font-size:23px;
-  font-weight:900
-}
-
-.logo span{
-  color:var(--y)
-}
-
-button{
-  border:0;
-  border-radius:12px;
-  padding:12px 18px;
-  font-weight:800;
-  cursor:pointer
-}
-
-.cart{
-  background:var(--y);
-  color:#111
-}
-
-.hero{
-  padding:55px 5%;
-  background:#111;
-  color:#fff;
-  text-align:center
-}
-
-.hero h1{
-  font-size:42px;
-  margin:8px
-}
-
-.hero h1 span{
-  color:var(--y)
-}
-
-.hero p{
-  color:#ccc
-}
-
-.search{
-  max-width:650px;
-  margin:25px auto 0;
-  display:flex;
-  background:#fff;
-  border-radius:15px;
-  overflow:hidden
-}
-
-.search input{
-  flex:1;
-  border:0;
-  padding:16px;
-  font-size:16px;
-  outline:0
-}
-
-.search button{
-  background:var(--y);
-  border-radius:0
-}
-
-main{
-  max-width:1200px;
-  margin:auto;
-  padding:30px 5%
-}
-
-.cats{
-  display:flex;
-  gap:10px;
-  overflow:auto;
-  padding-bottom:15px
-}
-
-.cat{
-  background:#fff;
-  white-space:nowrap
-}
-
-.cat.active{
-  background:var(--y)
-}
-
-h2{
-  margin-top:28px
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:18px
-}
-
-.card{
-  background:#fff;
-  border-radius:18px;
-  overflow:hidden;
-  box-shadow:0 5px 18px #0000000d
-}
-
-.pic{
-  height:150px;
-  background:#ddd;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:60px
-}
-
-.info{
-  padding:15px
-}
-
-.info h3{
-  margin:0 0 7px
-}
-
-.price{
-  font-weight:900;
-  font-size:19px
-}
-
-.row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:8px;
-  margin-top:13px
-}
-
-.add{
-  background:#111;
-  color:#fff
-}
-
-.panel{
-  position:fixed;
-  right:-420px;
-  top:0;
-  width:min(420px,100%);
-  height:100%;
-  background:#fff;
-  z-index:10;
-  transition:.3s;
-  padding:20px;
-  overflow:auto;
-  box-shadow:-5px 0 20px #0002
-}
-
-.panel.open{
-  right:0
-}
-
-.overlay{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:#0007;
-  z-index:9
-}
-
-.overlay.open{
-  display:block
-}
-
-.item{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  border-bottom:1px solid #eee;
-  padding:12px 0
-}
-
-.total{
-  font-size:22px;
-  font-weight:900;
-  margin:20px 0
-}
-
-.form input,
-.form select{
-  width:100%;
-  padding:13px;
-  margin:7px 0;
-  border:1px solid #ddd;
-  border-radius:10px
-}
-
-.checkout{
-  width:100%;
-  background:var(--y)
-}
-
-.empty{
-  text-align:center;
-  color:var(--mut);
-  padding:50px 0
-}
-
-footer{
-  text-align:center;
-  padding:30px;
-  background:#111;
-  color:#aaa;
-  margin-top:30px
-}
-
-@media(max-width:600px){
-  .hero h1{
-    font-size:31px
-  }
-
-  .hero{
-    padding:38px 5%
-  }
-}
+body{margin:0;font-family:Arial,sans-serif;background:var(--g);color:#111}
+header{background:#111;color:#fff;padding:16px 5%;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+.logo{font-size:23px;font-weight:900}.logo span{color:var(--y)}
+button{border:0;border-radius:12px;padding:12px 18px;font-weight:800;cursor:pointer}
+.cart{background:var(--y)}
+.account{background:#fff;margin-left:8px}
+.hero{padding:55px 5%;background:#111;color:#fff;text-align:center}
+.hero h1{font-size:42px;margin:8px}.hero h1 span{color:var(--y)}
+.hero p{color:#ccc}
+.search{max-width:650px;margin:25px auto 0;display:flex;background:#fff;border-radius:15px;overflow:hidden}
+.search input{flex:1;border:0;padding:16px;font-size:16px;outline:0}
+.search button{background:var(--y);border-radius:0}
+main{max-width:1200px;margin:auto;padding:30px 5%}
+.cats{display:flex;gap:10px;overflow:auto;padding-bottom:15px}
+.cat{background:#fff;white-space:nowrap}.cat.active{background:var(--y)}
+h2{margin-top:28px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+.card{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 5px 18px #0000000d}
+.pic{height:150px;background:#ddd;display:flex;align-items:center;justify-content:center;font-size:60px}
+.info{padding:15px}.info h3{margin:0 0 7px}
+.price{font-weight:900;font-size:19px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:13px}
+.add{background:#111;color:#fff}
+.panel{position:fixed;right:-420px;top:0;width:min(420px,100%);height:100%;background:#fff;z-index:10;transition:.3s;padding:20px;overflow:auto;box-shadow:-5px 0 20px #0002}
+.panel.open{right:0}
+.overlay{display:none;position:fixed;inset:0;background:#0007;z-index:9}
+.overlay.open{display:block}
+.item{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #eee;padding:12px 0}
+.total{font-size:22px;font-weight:900;margin:20px 0}
+.form input{width:100%;padding:13px;margin:7px 0;border:1px solid #ddd;border-radius:10px}
+.checkout{width:100%;background:var(--y)}
+.empty{text-align:center;color:#777;padding:50px 0}
+.auth{display:none;position:fixed;inset:0;background:#0008;z-index:20;align-items:center;justify-content:center;padding:20px}
+.auth.open{display:flex}
+.authbox{background:#fff;width:min(420px,100%);padding:25px;border-radius:20px}
+.authbox input{width:100%;padding:14px;margin:7px 0;border:1px solid #ddd;border-radius:10px}
+.authbox button{width:100%;margin-top:8px}
+.register{background:#111;color:#fff}
+.login{background:var(--y)}
+.close{background:#eee}
+footer{text-align:center;padding:30px;background:#111;color:#aaa;margin-top:30px}
+@media(max-width:600px){.hero h1{font-size:31px}.hero{padding:38px 5%}}
 </style>
 </head>
 
 <body>
 
 <header>
-  <div class="logo">DJALIL <span>DELIVERY</span></div>
-  <button class="cart" onclick="openCart()">
-    🛒 السلة (<span id="count">0</span>)
-  </button>
+<div class="logo">DJALIL <span>DELIVERY</span></div>
+<div>
+<button class="account" onclick="openAuth()">👤 حسابي</button>
+<button class="cart" onclick="openCart()">🛒 السلة (<span id="count">0</span>)</button>
+</div>
 </header>
 
 <section class="hero">
-
-  <h1>وش حاب <span>تاكل اليوم؟</span> 🍔</h1>
-
-  <p>
-    اطلب من مطاعمك المفضلة وخلي Djalil Delivery يوصلهالك
-  </p>
-
-  <div class="search">
-    <input
-      id="search"
-      placeholder="ابحث عن بيتزا، برغر، كريب..."
-      oninput="render()"
-    >
-
-    <button>بحث</button>
-  </div>
-
+<h1>وش حاب <span>تاكل اليوم؟</span> 🍔</h1>
+<p>اطلب من مطاعمك المفضلة وخلي Djalil Delivery يوصلهالك</p>
+<div class="search">
+<input id="search" placeholder="ابحث عن بيتزا، برغر، كريب..." oninput="render()">
+<button>بحث</button>
+</div>
 </section>
 
 <main>
+<h2>التصنيفات</h2>
+<div class="cats" id="cats"></div>
 
-  <h2>التصنيفات</h2>
-
-  <div class="cats" id="cats"></div>
-
-  <h2>الأكثر طلباً 🔥</h2>
-
-  <div class="grid" id="products"></div>
-
+<h2>الأكثر طلباً 🔥</h2>
+<div class="grid" id="products"></div>
 </main>
 
-<div
-  class="overlay"
-  id="overlay"
-  onclick="closeCart()">
-</div>
+<div class="overlay" id="overlay" onclick="closeCart()"></div>
 
 <aside class="panel" id="panel">
+<h2>🛒 سلة الطلب</h2>
+<div id="cartItems"></div>
 
-  <h2>🛒 سلة الطلب</h2>
+<div class="total">
+المجموع: <span id="total">0</span> دج
+</div>
 
-  <div id="cartItems"></div>
+<div class="form">
+<h3>معلومات التوصيل</h3>
+<input id="name" placeholder="الاسم الكامل">
+<input id="phone" placeholder="رقم الهاتف">
+<input id="address" placeholder="العنوان بالتفصيل">
 
-  <div class="total">
-    المجموع:
-    <span id="total">0</span>
-    دج
-  </div>
-
-  <div class="form">
-
-    <h3>معلومات التوصيل</h3>
-
-    <input
-      id="name"
-      placeholder="الاسم الكامل"
-    >
-
-    <input
-      id="phone"
-      placeholder="رقم الهاتف"
-    >
-
-    <input
-      id="address"
-      placeholder="العنوان بالتفصيل"
-    >
-
-    <select id="payment">
-      <option>الدفع عند الاستلام</option>
-      <option>الدفع الإلكتروني (قريباً)</option>
-    </select>
-
-    <button
-      class="checkout"
-      onclick="order()">
-      تأكيد الطلب
-    </button>
-
-  </div>
-
+<button class="checkout" onclick="order()">
+تأكيد الطلب
+</button>
+</div>
 </aside>
 
+<!-- تسجيل الدخول -->
+<div class="auth" id="auth">
+<div class="authbox">
+
+<h2>👤 حساب Djalil Delivery</h2>
+
+<input id="authName" placeholder="الاسم الكامل">
+
+<input id="authPhone" placeholder="رقم الهاتف">
+
+<input id="authPassword" type="password" placeholder="كلمة السر">
+
+<button class="register" onclick="registerUser()">
+إنشاء حساب
+</button>
+
+<button class="login" onclick="loginUser()">
+تسجيل الدخول
+</button>
+
+<button class="close" onclick="closeAuth()">
+إغلاق
+</button>
+
+</div>
+</div>
+
 <footer>
-  © 2026 Djalil Delivery — الجزائر 🇩🇿
+© 2026 Djalil Delivery — الجزائر 🇩🇿
 </footer>
 
 <script>
 
-const products = [
+const API="";
 
-  {
-    id:1,
-    n:"Classic Burger",
-    c:"برغر",
-    p:650,
-    e:"🍔"
-  },
-
-  {
-    id:2,
-    n:"Double Cheese",
-    c:"برغر",
-    p:850,
-    e:"🍔"
-  },
-
-  {
-    id:3,
-    n:"Pizza Margherita",
-    c:"بيتزا",
-    p:900,
-    e:"🍕"
-  },
-
-  {
-    id:4,
-    n:"Pizza 4 Fromages",
-    c:"بيتزا",
-    p:1200,
-    e:"🍕"
-  },
-
-  {
-    id:5,
-    n:"Crêpe Choko",
-    c:"كريب",
-    p:550,
-    e:"🥞"
-  },
-
-  {
-    id:6,
-    n:"Crêpe Bueno",
-    c:"كريب",
-    p:750,
-    e:"🥞"
-  },
-
-  {
-    id:7,
-    n:"Tacos Poulet",
-    c:"تاكوس",
-    p:700,
-    e:"🌯"
-  },
-
-  {
-    id:8,
-    n:"Chicken Box",
-    c:"دجاج",
-    p:800,
-    e:"🍗"
-  },
-
-  {
-    id:9,
-    n:"Frites",
-    c:"إضافات",
-    p:250,
-    e:"🍟"
-  },
-
-  {
-    id:10,
-    n:"Coca Cola",
-    c:"مشروبات",
-    p:150,
-    e:"🥤"
-  }
-
+const products=[
+{id:1,n:"Classic Burger",c:"برغر",p:650,e:"🍔"},
+{id:2,n:"Double Cheese",c:"برغر",p:850,e:"🍔"},
+{id:3,n:"Pizza Margherita",c:"بيتزا",p:900,e:"🍕"},
+{id:4,n:"Pizza 4 Fromages",c:"بيتزا",p:1200,e:"🍕"},
+{id:5,n:"Crêpe Choko",c:"كريب",p:550,e:"🥞"},
+{id:6,n:"Crêpe Bueno",c:"كريب",p:750,e:"🥞"},
+{id:7,n:"Tacos Poulet",c:"تاكوس",p:700,e:"🌯"},
+{id:8,n:"Chicken Box",c:"دجاج",p:800,e:"🍗"},
+{id:9,n:"Frites",c:"إضافات",p:250,e:"🍟"},
+{id:10,n:"Coca Cola",c:"مشروبات",p:150,e:"🥤"}
 ];
 
-let cat = "الكل";
-let cart = [];
+let cat="الكل";
+let cart=[];
+
+function openAuth(){
+document.getElementById("auth").classList.add("open");
+}
+
+function closeAuth(){
+document.getElementById("auth").classList.remove("open");
+}
+
+async function registerUser(){
+
+const name=document.getElementById("authName").value.trim();
+const phone=document.getElementById("authPhone").value.trim();
+const password=document.getElementById("authPassword").value;
+
+if(!name||!phone||!password){
+return alert("عمّر المعلومات كاملة");
+}
+
+const res=await fetch(API+"/api/register",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({name,phone,password})
+});
+
+const data=await res.json();
+
+if(!res.ok){
+return alert(data.error||"حدث خطأ");
+}
+
+localStorage.setItem("token",data.token);
+
+alert("تم إنشاء حسابك بنجاح 🎉");
+
+closeAuth();
+}
+
+async function loginUser(){
+
+const phone=document.getElementById("authPhone").value.trim();
+const password=document.getElementById("authPassword").value;
+
+if(!phone||!password){
+return alert("دخل رقم الهاتف وكلمة السر");
+}
+
+const res=await fetch(API+"/api/login",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({phone,password})
+});
+
+const data=await res.json();
+
+if(!res.ok){
+return alert(data.error||"بيانات الدخول خاطئة");
+}
+
+localStorage.setItem("token",data.token);
+
+alert("مرحبا بيك "+data.user.name+" 🎉");
+
+closeAuth();
+}
 
 function renderCats(){
 
-  let cats = [
-    "الكل",
-    ...new Set(products.map(x => x.c))
-  ];
+let cats=["الكل",...new Set(products.map(x=>x.c))];
 
-  document.getElementById("cats").innerHTML =
-    cats.map(x => `
-      <button
-        class="cat ${x == cat ? 'active' : ''}"
-        onclick="cat='${x}';render()">
-        ${x}
-      </button>
-    `).join("");
-
+document.getElementById("cats").innerHTML=
+cats.map(x=>`
+<button class="cat ${x==cat?'active':''}"
+onclick="cat='${x}';render()">
+${x}
+</button>
+`).join("");
 }
 
 function render(){
 
-  renderCats();
+renderCats();
 
-  let q =
-    document
-      .getElementById("search")
-      .value
-      .toLowerCase();
+let q=document.getElementById("search").value.toLowerCase();
 
-  let list =
-    products.filter(x =>
-      (cat == "الكل" || x.c == cat) &&
-      x.n.toLowerCase().includes(q)
-    );
+let list=products.filter(x=>
+(cat=="الكل"||x.c==cat)&&
+x.n.toLowerCase().includes(q)
+);
 
-  document.getElementById("products").innerHTML =
-    list.map(x => `
+document.getElementById("products").innerHTML=
+list.map(x=>`
+<div class="card">
+<div class="pic">${x.e}</div>
 
-      <div class="card">
+<div class="info">
+<h3>${x.n}</h3>
+<small>${x.c}</small>
 
-        <div class="pic">
-          ${x.e}
-        </div>
+<div class="row">
+<span class="price">${x.p} دج</span>
 
-        <div class="info">
+<button class="add" onclick="add(${x.id})">
++ أضف
+</button>
 
-          <h3>${x.n}</h3>
-
-          <small>${x.c}</small>
-
-          <div class="row">
-
-            <span class="price">
-              ${x.p} دج
-            </span>
-
-            <button
-              class="add"
-              onclick="add(${x.id})">
-              + أضف
-            </button>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    `).join("");
-
+</div>
+</div>
+</div>
+`).join("");
 }
 
 function add(id){
 
-  let x =
-    cart.find(i => i.id == id);
+let x=cart.find(i=>i.id==id);
 
-  if(x){
+x?x.q++:cart.push({
+...products.find(i=>i.id==id),
+q:1
+});
 
-    x.q++;
-
-  }else{
-
-    cart.push({
-      ...products.find(i => i.id == id),
-      q:1
-    });
-
-  }
-
-  update();
-  openCart();
-
+update();
+openCart();
 }
 
 function update(){
 
-  document.getElementById("count").textContent =
-    cart.reduce((a,x) => a + x.q,0);
+document.getElementById("count").textContent=
+cart.reduce((a,x)=>a+x.q,0);
 
-  document.getElementById("cartItems").innerHTML =
-    cart.length
+document.getElementById("cartItems").innerHTML=
+cart.length?
 
-    ? cart.map(x => `
+cart.map(x=>`
+<div class="item">
+<div>
+${x.e} ${x.n}<br>
+<small>${x.p} دج × ${x.q}</small>
+</div>
 
-      <div class="item">
+<button onclick="removeItem(${x.id})">
+حذف
+</button>
+</div>
+`).join("")
 
-        <div>
-          ${x.e} ${x.n}
-          <br>
-          <small>
-            ${x.p} دج × ${x.q}
-          </small>
-        </div>
+:
+'<div class="empty">السلة فارغة</div>';
 
-        <button
-          onclick="remove(${x.id})">
-          حذف
-        </button>
-
-      </div>
-
-    `).join("")
-
-    : '<div class="empty">السلة فارغة</div>';
-
-  document.getElementById("total").textContent =
-    cart.reduce(
-      (a,x) => a + x.p * x.q,
-      0
-    );
-
+document.getElementById("total").textContent=
+cart.reduce((a,x)=>a+x.p*x.q,0);
 }
 
-function remove(id){
+function removeItem(id){
 
-  cart =
-    cart.filter(x => x.id != id);
+cart=cart.filter(x=>x.id!=id);
 
-  update();
-
+update();
 }
 
 function openCart(){
 
-  document
-    .getElementById("panel")
-    .classList.add("open");
+document.getElementById("panel").classList.add("open");
+document.getElementById("overlay").classList.add("open");
 
-  document
-    .getElementById("overlay")
-    .classList.add("open");
-
-  update();
-
+update();
 }
 
 function closeCart(){
 
-  document
-    .getElementById("panel")
-    .classList.remove("open");
-
-  document
-    .getElementById("overlay")
-    .classList.remove("open");
-
+document.getElementById("panel").classList.remove("open");
+document.getElementById("overlay").classList.remove("open");
 }
 
-function order(){
+async function order(){
 
-  if(!cart.length){
+if(!cart.length){
+return alert("السلة فارغة");
+}
 
-    return alert("السلة فارغة");
+const token=localStorage.getItem("token");
 
-  }
+if(!token){
+closeCart();
+openAuth();
+return alert("لازم تسجل الدخول أولاً");
+}
 
-  if(
-    !name.value ||
-    !phone.value ||
-    !address.value
-  ){
+const name=document.getElementById("name").value.trim();
+const phone=document.getElementById("phone").value.trim();
+const address=document.getElementById("address").value.trim();
 
-    return alert(
-      "عمّر معلومات التوصيل كاملة"
-    );
+if(!name||!phone||!address){
+return alert("عمّر معلومات التوصيل كاملة");
+}
 
-  }
+const res=await fetch(API+"/api/orders",{
+method:"POST",
 
-  alert(
-    "تم تسجيل طلبك بنجاح 🎉\n" +
-    "Djalil Delivery راح يتواصل معاك لتأكيد الطلب."
-  );
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+token
+},
 
-  cart = [];
+body:JSON.stringify({
+items:cart.map(x=>({
+id:x.id,
+q:x.q
+})),
+address,
+phone
+})
+});
 
-  update();
+const data=await res.json();
 
-  closeCart();
+if(!res.ok){
+return alert(data.error||"تعذر تسجيل الطلب");
+}
 
+alert(
+"تم تسجيل طلبك بنجاح 🎉\n"+
+"رقم الطلب: #"+data.id+"\n"+
+"المجموع مع التوصيل: "+data.total+" دج"
+);
+
+cart=[];
+update();
+closeCart();
 }
 
 render();
