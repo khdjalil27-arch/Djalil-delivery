@@ -1,27 +1,26 @@
 function logout() {
   localStorage.removeItem("token");
 
-  // تفريغ خانات تسجيل الدخول والتسجيل
-  document.querySelectorAll("input").forEach((input) => {
-    if (
-      input.type !== "button" &&
-      input.type !== "submit" &&
-      input.type !== "hidden"
-    ) {
-      input.value = "";
-    }
+  // تفريغ خانات تسجيل الدخول والتسجيل فقط
+  const fields = [
+    "loginPhone",
+    "loginPassword",
+    "registerName",
+    "registerPhone",
+    "registerPassword"
+  ];
+
+  fields.forEach((id) => {
+    const input = document.getElementById(id);
+    if (input) input.value = "";
   });
 
-  // تفريغ النصوص المخزنة في حقول textarea
-  document.querySelectorAll("textarea").forEach((textarea) => {
-    textarea.value = "";
-  });
-
-  // إعادة الصفحة لحالة تسجيل الخروج
+  // إعادة حالة الحساب
   if (typeof checkSession === "function") {
     checkSession();
   }
 
+  // إخفاء الحساب وإظهار تسجيل الدخول
   if (typeof renderAuth === "function") {
     renderAuth();
   }
