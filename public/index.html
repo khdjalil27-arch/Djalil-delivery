@@ -1,7 +1,856 @@
-function logout() {
-  localStorage.removeItem("token");
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  // تفريغ خانات تسجيل الدخول والتسجيل فقط
+<title>Djalil Delivery</title>
+
+<style>
+:root{
+  --yellow:#ffd21c;
+  --black:#111;
+  --gray:#f5f5f5;
+  --white:#fff;
+  --red:#e53935;
+  --green:#19a463;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--gray);
+  color:var(--black);
+}
+
+button,
+input,
+textarea{
+  font-family:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+header{
+  background:var(--black);
+  color:white;
+  padding:14px 18px;
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+
+.header-inner{
+  max-width:1100px;
+  margin:auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+}
+
+.logo{
+  font-size:23px;
+  font-weight:bold;
+  color:var(--yellow);
+}
+
+.header-actions{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+.btn{
+  border:0;
+  border-radius:10px;
+  padding:10px 15px;
+  font-weight:bold;
+}
+
+.btn-yellow{
+  background:var(--yellow);
+  color:#111;
+}
+
+.btn-dark{
+  background:#292929;
+  color:white;
+}
+
+.btn-red{
+  background:var(--red);
+  color:white;
+}
+
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:20px 15px;
+}
+
+.hero{
+  background:linear-gradient(135deg,#111,#292929);
+  color:white;
+  border-radius:20px;
+  padding:35px 25px;
+  margin-bottom:20px;
+}
+
+.hero h1{
+  margin:0 0 10px;
+  font-size:34px;
+}
+
+.hero p{
+  color:#ddd;
+  margin:0 0 20px;
+}
+
+.search{
+  width:100%;
+  padding:14px;
+  border:2px solid #ddd;
+  border-radius:12px;
+  font-size:16px;
+  outline:none;
+}
+
+.categories{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding:15px 0;
+}
+
+.category{
+  border:0;
+  background:white;
+  padding:10px 17px;
+  border-radius:20px;
+  white-space:nowrap;
+}
+
+.category.active{
+  background:var(--yellow);
+  font-weight:bold;
+}
+
+.products{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
+  gap:15px;
+}
+
+.product{
+  background:white;
+  border-radius:17px;
+  padding:18px;
+  box-shadow:0 3px 12px #0000000d;
+}
+
+.product-emoji{
+  font-size:55px;
+  text-align:center;
+  padding:12px;
+}
+
+.product h3{
+  margin:8px 0;
+}
+
+.product-category{
+  color:#777;
+  font-size:13px;
+}
+
+.price{
+  font-size:20px;
+  font-weight:bold;
+  margin:12px 0;
+}
+
+.add{
+  width:100%;
+  background:var(--yellow);
+  border:0;
+  padding:12px;
+  border-radius:10px;
+  font-weight:bold;
+}
+
+.empty{
+  text-align:center;
+  padding:40px;
+  color:#777;
+}
+
+.cart-bar{
+  position:fixed;
+  bottom:15px;
+  left:15px;
+  right:15px;
+  max-width:500px;
+  margin:auto;
+  background:var(--black);
+  color:white;
+  border-radius:15px;
+  padding:12px 15px;
+  display:none;
+  justify-content:space-between;
+  align-items:center;
+  z-index:90;
+  box-shadow:0 5px 25px #0005;
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:#0008;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
+  z-index:200;
+}
+
+.modal-box{
+  background:white;
+  width:100%;
+  max-width:500px;
+  max-height:90vh;
+  overflow:auto;
+  border-radius:18px;
+  padding:22px;
+  position:relative;
+}
+
+.close{
+  position:absolute;
+  top:10px;
+  left:10px;
+  border:0;
+  background:#eee;
+  width:35px;
+  height:35px;
+  border-radius:50%;
+  font-size:20px;
+}
+
+.form-group{
+  margin-bottom:13px;
+}
+
+.form-group label{
+  display:block;
+  margin-bottom:6px;
+  font-weight:bold;
+}
+
+.form-group input,
+.form-group textarea{
+  width:100%;
+  padding:12px;
+  border:1px solid #ddd;
+  border-radius:10px;
+  font-size:15px;
+  outline:none;
+}
+
+.form-group textarea{
+  min-height:90px;
+  resize:vertical;
+}
+
+.auth-tabs{
+  display:flex;
+  gap:5px;
+  background:#eee;
+  padding:4px;
+  border-radius:10px;
+  margin-bottom:20px;
+}
+
+.auth-tab{
+  flex:1;
+  border:0;
+  padding:10px;
+  border-radius:8px;
+  background:transparent;
+}
+
+.auth-tab.active{
+  background:white;
+  font-weight:bold;
+}
+
+.auth-form{
+  display:none;
+}
+
+.auth-form.active{
+  display:block;
+}
+
+.user-box{
+  display:none;
+  align-items:center;
+  gap:8px;
+}
+
+.user-name{
+  color:var(--yellow);
+  font-weight:bold;
+}
+
+.cart-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 0;
+  border-bottom:1px solid #eee;
+}
+
+.cart-item-info{
+  flex:1;
+}
+
+.qty{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.qty button{
+  width:30px;
+  height:30px;
+  border:0;
+  border-radius:7px;
+  background:#eee;
+}
+
+.cart-total{
+  display:flex;
+  justify-content:space-between;
+  font-weight:bold;
+  font-size:18px;
+  padding:15px 0;
+}
+
+.message{
+  padding:12px;
+  border-radius:10px;
+  margin-bottom:12px;
+  display:none;
+}
+
+.message.error{
+  display:block;
+  background:#ffe5e5;
+  color:#b00000;
+}
+
+.message.success{
+  display:block;
+  background:#e2f8ed;
+  color:#08733e;
+}
+
+.orders-list{
+  margin-top:10px;
+}
+
+.order{
+  background:white;
+  border-radius:12px;
+  padding:15px;
+  margin-bottom:10px;
+}
+
+.status{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:15px;
+  background:#eee;
+  font-size:12px;
+  font-weight:bold;
+}
+
+footer{
+  margin-top:50px;
+  background:#111;
+  color:white;
+  text-align:center;
+  padding:25px;
+}
+
+@media(max-width:600px){
+  .hero h1{
+    font-size:27px;
+  }
+
+  .header-inner{
+    flex-wrap:wrap;
+  }
+
+  .user-name{
+    display:none;
+  }
+
+  .products{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .product{
+    padding:12px;
+  }
+
+  .product-emoji{
+    font-size:42px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-inner">
+
+    <div class="logo">
+      🍔 Djalil Delivery
+    </div>
+
+    <div class="header-actions">
+
+      <button
+        id="loginBtn"
+        class="btn btn-yellow"
+        onclick="openAuth()">
+        تسجيل الدخول
+      </button>
+
+      <div id="userBox" class="user-box">
+        <span id="userName" class="user-name"></span>
+
+        <button
+          class="btn btn-dark"
+          onclick="openOrders()">
+          طلباتي
+        </button>
+
+        <button
+          class="btn btn-red"
+          onclick="logout()">
+          خروج
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+</header>
+
+
+<main class="container">
+
+  <section class="hero">
+
+    <h1>وش تحب تاكل اليوم؟ 🍔</h1>
+
+    <p>
+      اطلب أكلك المفضل وخليه يوصلك حتى لباب دارك.
+    </p>
+
+    <input
+      id="search"
+      class="search"
+      type="search"
+      placeholder="ابحث عن برغر، بيتزا، كريب..."
+      oninput="renderProducts()">
+
+  </section>
+
+
+  <div id="categories" class="categories"></div>
+
+
+  <section>
+
+    <div
+      id="products"
+      class="products">
+    </div>
+
+  </section>
+
+</main>
+
+
+<div
+  id="cartBar"
+  class="cart-bar">
+
+  <div>
+    🛒 السلة:
+    <strong id="cartCount">0</strong>
+    منتج
+  </div>
+
+  <button
+    class="btn btn-yellow"
+    onclick="openCart()">
+    عرض السلة
+  </button>
+
+</div>
+
+
+<footer>
+  <strong>Djalil Delivery</strong>
+  <br>
+  خدمة توصيل الطعام
+</footer>
+
+
+<!-- AUTH MODAL -->
+
+<div
+  id="authModal"
+  class="modal">
+
+  <div class="modal-box">
+
+    <button
+      class="close"
+      onclick="closeModal('authModal')">
+      ×
+    </button>
+
+    <h2>مرحبا 👋</h2>
+
+    <div
+      id="authMessage"
+      class="message">
+    </div>
+
+    <div class="auth-tabs">
+
+      <button
+        id="loginTab"
+        class="auth-tab active"
+        onclick="showAuthForm('login')">
+        تسجيل الدخول
+      </button>
+
+      <button
+        id="registerTab"
+        class="auth-tab"
+        onclick="showAuthForm('register')">
+        إنشاء حساب
+      </button>
+
+    </div>
+
+
+    <!-- LOGIN -->
+
+    <form
+      id="loginForm"
+      class="auth-form active"
+      onsubmit="login(event)">
+
+      <div class="form-group">
+
+        <label>رقم الهاتف</label>
+
+        <input
+          id="loginPhone"
+          name="phone"
+          type="tel"
+          autocomplete="tel"
+          placeholder="0550000000"
+          required>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>كلمة السر</label>
+
+        <input
+          id="loginPassword"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          placeholder="كلمة السر"
+          required>
+
+      </div>
+
+
+      <button
+        class="btn btn-yellow"
+        style="width:100%"
+        type="submit">
+        دخول
+      </button>
+
+    </form>
+
+
+    <!-- REGISTER -->
+
+    <form
+      id="registerForm"
+      class="auth-form"
+      onsubmit="register(event)">
+
+      <div class="form-group">
+
+        <label>الاسم</label>
+
+        <input
+          id="registerName"
+          name="name"
+          type="text"
+          autocomplete="name"
+          placeholder="اسمك"
+          required>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>رقم الهاتف</label>
+
+        <input
+          id="registerPhone"
+          name="phone"
+          type="tel"
+          autocomplete="tel"
+          placeholder="0550000000"
+          required>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>كلمة السر</label>
+
+        <input
+          id="registerPassword"
+          name="password"
+          type="password"
+          autocomplete="new-password"
+          placeholder="8 أحرف على الأقل"
+          minlength="8"
+          required>
+
+      </div>
+
+
+      <button
+        class="btn btn-yellow"
+        style="width:100%"
+        type="submit">
+        إنشاء الحساب
+      </button>
+
+    </form>
+
+  </div>
+
+</div>
+
+
+<!-- CART MODAL -->
+
+<div
+  id="cartModal"
+  class="modal">
+
+  <div class="modal-box">
+
+    <button
+      class="close"
+      onclick="closeModal('cartModal')">
+      ×
+    </button>
+
+    <h2>🛒 السلة</h2>
+
+    <div id="cartItems"></div>
+
+    <div class="cart-total">
+      <span>المجموع</span>
+      <span id="cartTotal">0 دج</span>
+    </div>
+
+    <button
+      class="btn btn-yellow"
+      style="width:100%"
+      onclick="checkout()">
+      إتمام الطلب
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- CHECKOUT MODAL -->
+
+<div
+  id="checkoutModal"
+  class="modal">
+
+  <div class="modal-box">
+
+    <button
+      class="close"
+      onclick="closeModal('checkoutModal')">
+      ×
+    </button>
+
+    <h2>📦 معلومات التوصيل</h2>
+
+    <div
+      id="checkoutMessage"
+      class="message">
+    </div>
+
+    <form
+      onsubmit="placeOrder(event)">
+
+      <div class="form-group">
+
+        <label>العنوان</label>
+
+        <textarea
+          id="address"
+          placeholder="اكتب عنوان التوصيل بالتفصيل"
+          required></textarea>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>رقم الهاتف</label>
+
+        <input
+          id="orderPhone"
+          type="tel"
+          placeholder="0550000000"
+          required>
+
+      </div>
+
+
+      <button
+        class="btn btn-yellow"
+        style="width:100%"
+        type="submit">
+        تأكيد الطلب
+      </button>
+
+    </form>
+
+  </div>
+
+</div>
+
+
+<!-- ORDERS MODAL -->
+
+<div
+  id="ordersModal"
+  class="modal">
+
+  <div class="modal-box">
+
+    <button
+      class="close"
+      onclick="closeModal('ordersModal')">
+      ×
+    </button>
+
+    <h2>📦 طلباتي</h2>
+
+    <div id="ordersList"></div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+const API = "/api";
+
+let products = [];
+let cart = [];
+let selectedCategory = "الكل";
+let currentUser = null;
+
+
+/* =========================
+   HELPERS
+========================= */
+
+function escapeHTML(value) {
+
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+function money(value) {
+
+  return Number(value || 0).toLocaleString("fr-DZ") + " دج";
+
+}
+
+
+function openModal(id) {
+
+  const modal = document.getElementById(id);
+
+  if (modal) {
+    modal.style.display = "flex";
+  }
+
+}
+
+
+function closeModal(id) {
+
+  const modal = document.getElementById(id);
+
+  if (modal) {
+    modal.style.display = "none";
+  }
+
+}
+
+
+function clearAuthFields() {
+
   const fields = [
     "loginPhone",
     "loginPassword",
@@ -11,17 +860,1136 @@ function logout() {
   ];
 
   fields.forEach((id) => {
-    const input = document.getElementById(id);
-    if (input) input.value = "";
+
+    const element = document.getElementById(id);
+
+    if (element) {
+      element.value = "";
+    }
+
   });
 
-  // إعادة حالة الحساب
-  if (typeof checkSession === "function") {
-    checkSession();
+}
+
+
+/* =========================
+   AUTH
+========================= */
+
+function openAuth() {
+
+  showAuthForm("login");
+
+  clearMessage("authMessage");
+
+  openModal("authModal");
+
+}
+
+
+function showAuthForm(type) {
+
+  const loginForm =
+    document.getElementById("loginForm");
+
+  const registerForm =
+    document.getElementById("registerForm");
+
+  const loginTab =
+    document.getElementById("loginTab");
+
+  const registerTab =
+    document.getElementById("registerTab");
+
+
+  if (type === "login") {
+
+    loginForm.classList.add("active");
+    registerForm.classList.remove("active");
+
+    loginTab.classList.add("active");
+    registerTab.classList.remove("active");
+
+  } else {
+
+    loginForm.classList.remove("active");
+    registerForm.classList.add("active");
+
+    loginTab.classList.remove("active");
+    registerTab.classList.add("active");
+
   }
 
-  // إخفاء الحساب وإظهار تسجيل الدخول
-  if (typeof renderAuth === "function") {
-    renderAuth();
-  }
 }
+
+
+function showMessage(id, text, type = "error") {
+
+  const element =
+    document.getElementById(id);
+
+  if (!element) return;
+
+  element.textContent = text;
+
+  element.className =
+    "message " + type;
+
+}
+
+
+function clearMessage(id) {
+
+  const element =
+    document.getElementById(id);
+
+  if (!element) return;
+
+  element.textContent = "";
+
+  element.className = "message";
+
+}
+
+
+async function login(event) {
+
+  event.preventDefault();
+
+  clearMessage("authMessage");
+
+  const phone =
+    document.getElementById("loginPhone").value.trim();
+
+  const password =
+    document.getElementById("loginPassword").value;
+
+
+  try {
+
+    const response = await fetch(
+      API + "/login",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          phone,
+          password
+        })
+      }
+    );
+
+
+    const data = await response.json();
+
+
+    if (!response.ok) {
+
+      showMessage(
+        "authMessage",
+        data.error || "فشل تسجيل الدخول."
+      );
+
+      return;
+
+    }
+
+
+    localStorage.setItem(
+      "token",
+      data.token
+    );
+
+
+    currentUser = data.user;
+
+    clearAuthFields();
+
+    closeModal("authModal");
+
+    updateUserUI();
+
+    await loadOrders();
+
+    alert("مرحبا " + data.user.name);
+
+  } catch (error) {
+
+    showMessage(
+      "authMessage",
+      "تعذر الاتصال بالخادم."
+    );
+
+  }
+
+}
+
+
+async function register(event) {
+
+  event.preventDefault();
+
+  clearMessage("authMessage");
+
+
+  const name =
+    document.getElementById("registerName").value.trim();
+
+  const phone =
+    document.getElementById("registerPhone").value.trim();
+
+  const password =
+    document.getElementById("registerPassword").value;
+
+
+  try {
+
+    const response = await fetch(
+      API + "/register",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          name,
+          phone,
+          password
+        })
+      }
+    );
+
+
+    const data = await response.json();
+
+
+    if (!response.ok) {
+
+      showMessage(
+        "authMessage",
+        data.error || "فشل إنشاء الحساب."
+      );
+
+      return;
+
+    }
+
+
+    localStorage.setItem(
+      "token",
+      data.token
+    );
+
+
+    currentUser = data.user;
+
+    clearAuthFields();
+
+    closeModal("authModal");
+
+    updateUserUI();
+
+    alert("تم إنشاء الحساب بنجاح 🎉");
+
+  } catch (error) {
+
+    showMessage(
+      "authMessage",
+      "تعذر الاتصال بالخادم."
+    );
+
+  }
+
+}
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+function logout() {
+
+  localStorage.removeItem("token");
+
+  currentUser = null;
+
+  cart = [];
+
+  updateCartUI();
+
+  clearAuthFields();
+
+  updateUserUI();
+
+  closeModal("cartModal");
+  closeModal("checkoutModal");
+  closeModal("ordersModal");
+  closeModal("authModal");
+
+  /*
+    إعادة تحميل الصفحة تمنع المتصفح
+    من الاحتفاظ بمعلومات النماذج.
+  */
+
+  window.location.reload();
+
+}
+
+
+/* =========================
+   SESSION
+========================= */
+
+async function checkSession() {
+
+  const token =
+    localStorage.getItem("token");
+
+  if (!token) {
+
+    currentUser = null;
+
+    updateUserUI();
+
+    return;
+
+  }
+
+
+  try {
+
+    const response = await fetch(
+      API + "/me",
+      {
+        headers: {
+          Authorization: "Bearer " + token
+        }
+      }
+    );
+
+
+    if (!response.ok) {
+
+      localStorage.removeItem("token");
+
+      currentUser = null;
+
+      updateUserUI();
+
+      return;
+
+    }
+
+
+    const data =
+      await response.json();
+
+    currentUser = data.user;
+
+    updateUserUI();
+
+  } catch {
+
+    localStorage.removeItem("token");
+
+    currentUser = null;
+
+    updateUserUI();
+
+  }
+
+}
+
+
+function updateUserUI() {
+
+  const loginBtn =
+    document.getElementById("loginBtn");
+
+  const userBox =
+    document.getElementById("userBox");
+
+  const userName =
+    document.getElementById("userName");
+
+
+  if (currentUser) {
+
+    loginBtn.style.display = "none";
+
+    userBox.style.display = "flex";
+
+    userName.textContent =
+      currentUser.name;
+
+  } else {
+
+    loginBtn.style.display = "block";
+
+    userBox.style.display = "none";
+
+    userName.textContent = "";
+
+  }
+
+}
+
+
+/* =========================
+   PRODUCTS
+========================= */
+
+async function loadProducts() {
+
+  const container =
+    document.getElementById("products");
+
+
+  try {
+
+    const response =
+      await fetch(API + "/products");
+
+    products =
+      await response.json();
+
+    renderCategories();
+
+    renderProducts();
+
+  } catch {
+
+    container.innerHTML =
+      `<div class="empty">
+        تعذر تحميل المنتجات.
+      </div>`;
+
+  }
+
+}
+
+
+function renderCategories() {
+
+  const categories =
+    ["الكل"];
+
+  products.forEach((product) => {
+
+    if (
+      product.category &&
+      !categories.includes(product.category)
+    ) {
+
+      categories.push(product.category);
+
+    }
+
+  });
+
+
+  const container =
+    document.getElementById("categories");
+
+
+  container.innerHTML =
+    categories.map((category) => `
+
+      <button
+        class="category ${
+          selectedCategory === category
+            ? "active"
+            : ""
+        }"
+        onclick="selectCategory('${escapeHTML(category)}')">
+
+        ${escapeHTML(category)}
+
+      </button>
+
+    `).join("");
+
+}
+
+
+function selectCategory(category) {
+
+  selectedCategory = category;
+
+  renderCategories();
+
+  renderProducts();
+
+}
+
+
+function renderProducts() {
+
+  const container =
+    document.getElementById("products");
+
+  const search =
+    document.getElementById("search")
+      .value
+      .trim()
+      .toLowerCase();
+
+
+  const filtered =
+    products.filter((product) => {
+
+      const categoryMatch =
+        selectedCategory === "الكل" ||
+        product.category === selectedCategory;
+
+      const searchMatch =
+        !search ||
+        product.name.toLowerCase().includes(search) ||
+        String(product.category || "")
+          .toLowerCase()
+          .includes(search);
+
+      return categoryMatch && searchMatch;
+
+    });
+
+
+  if (!filtered.length) {
+
+    container.innerHTML =
+      `<div class="empty">
+        ما لقيناش المنتج لي راك تقلب عليه.
+      </div>`;
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+    filtered.map((product) => `
+
+      <article class="product">
+
+        <div class="product-emoji">
+          ${escapeHTML(product.emoji || "🍽️")}
+        </div>
+
+        <div class="product-category">
+          ${escapeHTML(product.category || "")}
+        </div>
+
+        <h3>
+          ${escapeHTML(product.name)}
+        </h3>
+
+        <div class="price">
+          ${money(product.price)}
+        </div>
+
+        <button
+          class="add"
+          onclick="addToCart(${product.id})">
+
+          + أضف للسلة
+
+        </button>
+
+      </article>
+
+    `).join("");
+
+}
+
+
+/* =========================
+   CART
+========================= */
+
+function addToCart(productId) {
+
+  const product =
+    products.find(
+      (item) => item.id === productId
+    );
+
+
+  if (!product) return;
+
+
+  const existing =
+    cart.find(
+      (item) => item.id === productId
+    );
+
+
+  if (existing) {
+
+    if (existing.quantity < 20) {
+      existing.quantity++;
+    }
+
+  } else {
+
+    cart.push({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      emoji: product.emoji,
+      quantity: 1
+    });
+
+  }
+
+
+  updateCartUI();
+
+}
+
+
+function changeQuantity(productId, change) {
+
+  const item =
+    cart.find(
+      (product) => product.id === productId
+    );
+
+
+  if (!item) return;
+
+
+  item.quantity += change;
+
+
+  if (item.quantity <= 0) {
+
+    cart =
+      cart.filter(
+        (product) =>
+          product.id !== productId
+      );
+
+  }
+
+
+  if (item.quantity > 20) {
+    item.quantity = 20;
+  }
+
+
+  updateCartUI();
+
+  renderCart();
+
+}
+
+
+function cartTotal() {
+
+  return cart.reduce(
+    (total, item) =>
+      total + item.price * item.quantity,
+    0
+  );
+
+}
+
+
+function updateCartUI() {
+
+  const count =
+    cart.reduce(
+      (total, item) =>
+        total + item.quantity,
+      0
+    );
+
+
+  const cartBar =
+    document.getElementById("cartBar");
+
+  const cartCount =
+    document.getElementById("cartCount");
+
+
+  cartCount.textContent = count;
+
+  cartBar.style.display =
+    count > 0 ? "flex" : "none";
+
+}
+
+
+function openCart() {
+
+  renderCart();
+
+  openModal("cartModal");
+
+}
+
+
+function renderCart() {
+
+  const container =
+    document.getElementById("cartItems");
+
+  const total =
+    document.getElementById("cartTotal");
+
+
+  if (!cart.length) {
+
+    container.innerHTML =
+      `<div class="empty">
+        السلة فارغة.
+      </div>`;
+
+    total.textContent = "0 دج";
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+    cart.map((item) => `
+
+      <div class="cart-item">
+
+        <div style="font-size:35px">
+          ${escapeHTML(item.emoji || "🍽️")}
+        </div>
+
+        <div class="cart-item-info">
+
+          <strong>
+            ${escapeHTML(item.name)}
+          </strong>
+
+          <br>
+
+          ${money(item.price)}
+
+        </div>
+
+        <div class="qty">
+
+          <button
+            onclick="changeQuantity(${item.id},-1)">
+            −
+          </button>
+
+          <strong>
+            ${item.quantity}
+          </strong>
+
+          <button
+            onclick="changeQuantity(${item.id},1)">
+            +
+          </button>
+
+        </div>
+
+      </div>
+
+    `).join("");
+
+
+  total.textContent =
+    money(cartTotal());
+
+}
+
+
+/* =========================
+   CHECKOUT
+========================= */
+
+async function checkout() {
+
+  if (!cart.length) {
+
+    alert("السلة فارغة.");
+
+    return;
+
+  }
+
+
+  const token =
+    localStorage.getItem("token");
+
+
+  if (!token) {
+
+    closeModal("cartModal");
+
+    openAuth();
+
+    return;
+
+  }
+
+
+  document.getElementById("orderPhone").value =
+    currentUser?.phone || "";
+
+
+  closeModal("cartModal");
+
+  openModal("checkoutModal");
+
+}
+
+
+async function placeOrder(event) {
+
+  event.preventDefault();
+
+  clearMessage("checkoutMessage");
+
+
+  const address =
+    document.getElementById("address")
+      .value
+      .trim();
+
+  const phone =
+    document.getElementById("orderPhone")
+      .value
+      .trim();
+
+
+  const token =
+    localStorage.getItem("token");
+
+
+  if (!token) {
+
+    closeModal("checkoutModal");
+
+    openAuth();
+
+    return;
+
+  }
+
+
+  const items =
+    cart.map((item) => ({
+      product_id: item.id,
+      quantity: item.quantity
+    }));
+
+
+  try {
+
+    const response =
+      await fetch(
+        API + "/orders",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+            Authorization:
+              "Bearer " + token
+          },
+
+          body: JSON.stringify({
+            items,
+            address,
+            phone
+          })
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (response.status === 401) {
+
+      localStorage.removeItem("token");
+
+      currentUser = null;
+
+      updateUserUI();
+
+      closeModal("checkoutModal");
+
+      openAuth();
+
+      return;
+
+    }
+
+
+    if (!response.ok) {
+
+      showMessage(
+        "checkoutMessage",
+        data.error || "فشل إرسال الطلب."
+      );
+
+      return;
+
+    }
+
+
+    cart = [];
+
+    updateCartUI();
+
+    document.getElementById("address").value = "";
+    document.getElementById("orderPhone").value = "";
+
+    closeModal("checkoutModal");
+
+    alert(
+      "تم إرسال طلبك بنجاح 🎉\nرقم الطلب: " +
+      data.order.id
+    );
+
+
+    await loadOrders();
+
+  } catch {
+
+    showMessage(
+      "checkoutMessage",
+      "تعذر الاتصال بالخادم."
+    );
+
+  }
+
+}
+
+
+/* =========================
+   ORDERS
+========================= */
+
+async function loadOrders() {
+
+  const token =
+    localStorage.getItem("token");
+
+  if (!token) return;
+
+
+  try {
+
+    const response =
+      await fetch(
+        API + "/orders",
+        {
+          headers: {
+            Authorization:
+              "Bearer " + token
+          }
+        }
+      );
+
+
+    if (!response.ok) return;
+
+
+    const data =
+      await response.json();
+
+
+    window.myOrders = data;
+
+  } catch {
+
+    window.myOrders = [];
+
+  }
+
+}
+
+
+function statusText(status) {
+
+  const statuses = {
+
+    received: "تم استلام الطلب",
+
+    preparing: "قيد التحضير",
+
+    pickup: "جاهز للاستلام",
+
+    on_the_way: "في الطريق 🚗",
+
+    delivered: "تم التوصيل ✅",
+
+    cancelled: "ملغى"
+
+  };
+
+
+  return statuses[status] || status;
+
+}
+
+
+function openOrders() {
+
+  renderOrders();
+
+  openModal("ordersModal");
+
+}
+
+
+async function renderOrders() {
+
+  const container =
+    document.getElementById("ordersList");
+
+
+  container.innerHTML =
+    `<div class="empty">
+      جاري تحميل الطلبات...
+    </div>`;
+
+
+  await loadOrders();
+
+
+  const orders =
+    window.myOrders || [];
+
+
+  if (!orders.length) {
+
+    container.innerHTML =
+      `<div class="empty">
+        ما عندك حتى طلب حاليا.
+      </div>`;
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+    orders.map((order) => {
+
+      const items =
+        Array.isArray(order.items)
+          ? order.items
+          : [];
+
+
+      return `
+
+        <div class="order">
+
+          <div style="
+            display:flex;
+            justify-content:space-between;
+            gap:10px;
+          ">
+
+            <strong>
+              طلب #${order.id}
+            </strong>
+
+            <span class="status">
+              ${escapeHTML(
+                statusText(order.status)
+              )}
+            </span>
+
+          </div>
+
+          <hr>
+
+          ${items.map((item) => `
+
+            <div style="margin:5px 0">
+
+              ${escapeHTML(
+                item.emoji || "🍽️"
+              )}
+
+              ${escapeHTML(item.name)}
+
+              × ${item.quantity}
+
+            </div>
+
+          `).join("")}
+
+          <hr>
+
+          <strong>
+            المجموع:
+            ${money(order.total)}
+          </strong>
+
+          <br>
+
+          <small>
+            ${escapeHTML(order.address)}
+          </small>
+
+        </div>
+
+      `;
+
+    }).join("");
+
+}
+
+
+/* =========================
+   START
+========================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  async () => {
+
+    await checkSession();
+
+    await loadProducts();
+
+    updateCartUI();
+
+  }
+);
+
+
+/* إغلاق النوافذ عند الضغط خارجها */
+
+document.querySelectorAll(".modal")
+  .forEach((modal) => {
+
+    modal.addEventListener(
+      "click",
+      (event) => {
+
+        if (event.target === modal) {
+          modal.style.display = "none";
+        }
+
+      }
+    );
+
+  });
+
+</script>
+
+</body>
+</html>
