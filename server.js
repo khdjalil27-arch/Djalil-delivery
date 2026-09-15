@@ -19,142 +19,193 @@ if (!JWT_SECRET || JWT_SECRET.length < 32) {
   process.exit(1);
 }
 
-/* =========================
-   SECURITY
-========================= */
-
 app.disable("x-powered-by");
 
 app.use(
   helmet({
-    contentSecurityPolicy: false
+    contentSecurityPolicy: false,
   })
 );
 
 app.use(cors());
 
-app.use(
-  express.json({
-    limit: "20kb"
-  })
-);
-
-app.use(
-  express.urlencoded({
-    extended: false,
-    limit: "20kb"
-  })
-);
+app.use(express.json({ limit: "20kb" }));
+app.use(express.urlencoded({ extended: true, limit: "20kb" }));
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 200,
+  max: 200,
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+  message: {
+    error: "طلبات كثيرة، حاول بعد قليل.",
+  },
 });
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 10,
+  max: 10,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
-    error: "محاولات كثيرة. حاول مرة أخرى بعد قليل."
-  }
+    error: "محاولات كثيرة، حاول بعد قليل.",
+  },
 });
 
 app.use("/api", apiLimiter);
 
-/* =========================
-   DATABASE
-========================= */
-
-const db = new Database("djalil.db");
+const db = new Database("delivery.db");
 
 db.pragma("journal_mode = WAL");
 db.pragma("foreign_keys = ON");
 
 db.exec(`
-  CREATE TABLE IF NOT EXISTS users(
+  CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     phone TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
-    role TEXT NOT NULL DEFAULT 'customer'
+    role TEXT NOT NULL DEFAULT 'customer',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   );
 
-  CREATE TABLE IF NOT EXISTS restaurants(
+  CREATE TABLE IF NOT EXISTS restaurants (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    phone TEXT,
-    address TEXT,
-    active INTEGER DEFAULT 1
+    phone TEXT NOT NULL,
+    address TEXT NOT NULL,
+    active INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   );
 
-  CREATE TABLE IF NOT EXISTS products(
+  CREATE TABLE IF NOT EXISTS products (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     restaurant_id INTEGER NOT NULL,
     name TEXT NOT NULL,
-    category TEXT,
+    category TEXT NOT NULL,
     price INTEGER NOT NULL,
-    emoji TEXT DEFAULT '🍽️',
-    active INTEGER DEFAULT 1
+    emoji TEXT DEFAULT '🍔',
+    active INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
   );
 
-  CREATE TABLE IF NOT EXISTS orders(
+  CREATE TABLE IF NOT EXISTS orders (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
-    restaurant_id INTEGER,
+    restaurant_id INTEGER NOT NULL,
     items TEXT NOT NULL,
     total INTEGER NOT NULL,
-    delivery_fee INTEGER NOT NULL,
+    delivery_fee INTEGER NOT NULL DEFAULT 300,
     address TEXT NOT NULL,
     phone TEXT NOT NULL,
+    latitude REAL,
+    longitude REAL,
     status TEXT NOT NULL DEFAULT 'received',
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
   );
 `);
+
+/*
+  Migration:
+  إذا كانت قاعدة البيانات القديمة موجودة،
+  نضيف latitude و longitude بدون حذف الطلبات القديمة.
+*/
+const orderColumns = db
+  .prepare("PRAGMA table_info(orders)")
+  .all()
+  .map((column) => column.name);
+
+if (!orderColumns.includes("latitude")) {
+  db.exec("ALTER TABLE orders ADD COLUMN latitude REAL");
+}
+
+if (!orderColumns.includes("longitude")) {
+  db.exec("ALTER TABLE orders ADD COLUMN longitude REAL");
+}
+
+/* =========================
+   SEED RESTAURANT
+========================= */
+
+const restaurantCount = db
+  .prepare("SELECT COUNT(*) AS count FROM restaurants")
+  .get();
+
+if (restaurantCount.count === 0) {
+  const restaurant = db
+    .prepare(
+      `
+      INSERT INTO restaurants(name, phone, address, active)
+      VALUES(?,?,?,1)
+      `
+    )
+    .run(
+      "Djalil Food",
+      "0550000000",
+      "الجزائر"
+    );
+
+  const restaurantId = restaurant.lastInsertRowid;
+
+  const products = [
+    ["Classic Burger", "burger", 650, "🍔"],
+    ["Double Cheese", "burger", 850, "🍔"],
+    ["Pizza Margherita", "pizza", 900, "🍕"],
+    ["Crêpe Choko", "crepe", 550, "🥞"],
+    ["Tacos Poulet", "tacos", 700, "🌯"],
+    ["Chicken Box", "chicken", 800, "🍗"],
+  ];
+
+  const insertProduct = db.prepare(`
+    INSERT INTO products(
+      restaurant_id,
+      name,
+      category,
+      price,
+      emoji,
+      active
+    )
+    VALUES(?,?,?,?,?,1)
+  `);
+
+  const seedProducts = db.transaction(() => {
+    for (const product of products) {
+      insertProduct.run(
+        restaurantId,
+        product[0],
+        product[1],
+        product[2],
+        product[3]
+      );
+    }
+  });
+
+  seedProducts();
+}
 
 /* =========================
    HELPERS
 ========================= */
 
-function cleanText(value, max = 200) {
-  return String(value ?? "")
-    .trim()
-    .replace(/\s+/g, " ")
-    .slice(0, max);
-}
-
-function cleanPhone(value) {
-  return String(value ?? "")
-    .trim()
-    .replace(/\s+/g, "");
-}
-
 function validPhone(phone) {
   return /^(\+213|0)(5|6|7)\d{8}$/.test(phone);
 }
 
-function validPassword(password) {
-  return (
-    typeof password === "string" &&
-    password.length >= 8 &&
-    password.length <= 100
-  );
-}
-
-function createToken(user) {
+function signToken(user) {
   return jwt.sign(
     {
       id: user.id,
+      name: user.name,
+      phone: user.phone,
       role: user.role,
-      phone: user.phone
     },
     JWT_SECRET,
     {
       expiresIn: "2d",
-      issuer: "djalil-delivery"
+      issuer: "djalil-delivery",
     }
   );
 }
@@ -165,25 +216,29 @@ function auth(req, res, next) {
 
     if (!header.startsWith("Bearer ")) {
       return res.status(401).json({
-        error: "غير مسجل الدخول."
+        error: "غير مسجل الدخول.",
       });
     }
 
     const token = header.slice(7);
 
     const decoded = jwt.verify(token, JWT_SECRET, {
-      issuer: "djalil-delivery"
+      issuer: "djalil-delivery",
     });
 
     const user = db
       .prepare(
-        "SELECT id,name,phone,role FROM users WHERE id=?"
+        `
+        SELECT id, name, phone, role
+        FROM users
+        WHERE id = ?
+        `
       )
       .get(decoded.id);
 
     if (!user) {
       return res.status(401).json({
-        error: "المستخدم غير موجود."
+        error: "المستخدم غير موجود.",
       });
     }
 
@@ -191,577 +246,469 @@ function auth(req, res, next) {
     next();
   } catch {
     return res.status(401).json({
-      error: "جلسة الدخول غير صالحة."
+      error: "الجلسة غير صالحة أو منتهية.",
     });
   }
 }
 
 function adminOnly(req, res, next) {
-  if (!req.user || req.user.role !== "admin") {
+  if (req.user?.role !== "admin") {
     return res.status(403).json({
-      error: "غير مصرح."
+      error: "غير مسموح.",
     });
   }
 
   next();
 }
 
-function staffOnly(req, res, next) {
+function adminOrDriver(req, res, next) {
   if (
-    !req.user ||
-    !["admin", "driver"].includes(req.user.role)
+    req.user?.role !== "admin" &&
+    req.user?.role !== "driver"
   ) {
     return res.status(403).json({
-      error: "غير مصرح."
+      error: "غير مسموح.",
     });
   }
 
   next();
-}
-
-/* =========================
-   SEED
-========================= */
-
-const restaurantCount = db
-  .prepare("SELECT COUNT(*) AS c FROM restaurants")
-  .get().c;
-
-if (!restaurantCount) {
-  const restaurant = db
-    .prepare(
-      `
-      INSERT INTO restaurants(
-        name,
-        phone,
-        address
-      )
-      VALUES(?,?,?)
-      `
-    )
-    .run(
-      "Djalil Food",
-      "0550000000",
-      "الجزائر"
-    );
-
-  const addProduct = db.prepare(`
-    INSERT INTO products(
-      restaurant_id,
-      name,
-      category,
-      price,
-      emoji
-    )
-    VALUES(?,?,?,?,?)
-  `);
-
-  const products = [
-    ["Classic Burger", "برغر", 650, "🍔"],
-    ["Double Cheese", "برغر", 850, "🍔"],
-    ["Pizza Margherita", "بيتزا", 900, "🍕"],
-    ["Crêpe Choko", "كريب", 550, "🥞"],
-    ["Tacos Poulet", "تاكوس", 700, "🌯"],
-    ["Chicken Box", "دجاج", 800, "🍗"]
-  ];
-
-  for (const product of products) {
-    addProduct.run(
-      restaurant.lastInsertRowid,
-      ...product
-    );
-  }
-}
-
-/* =========================
-   ADMIN AUTO SETUP
-========================= */
-
-async function setupAdmin() {
-  const name = cleanText(
-    process.env.ADMIN_NAME || "",
-    60
-  );
-
-  const phone = cleanPhone(
-    process.env.ADMIN_PHONE || ""
-  );
-
-  const password =
-    process.env.ADMIN_PASSWORD || "";
-
-  if (
-    !name ||
-    !validPhone(phone) ||
-    !validPassword(password)
-  ) {
-    console.log(
-      "ADMIN ENV not configured. Skipping admin setup."
-    );
-    return;
-  }
-
-  const existing = db
-    .prepare(
-      "SELECT id, role FROM users WHERE phone=?"
-    )
-    .get(phone);
-
-  if (existing) {
-    if (existing.role !== "admin") {
-      db.prepare(
-        "UPDATE users SET role='admin' WHERE id=?"
-      ).run(existing.id);
-
-      console.log(
-        "Existing user promoted to admin."
-      );
-    } else {
-      console.log(
-        "Admin account already exists."
-      );
-    }
-
-    return;
-  }
-
-  const hash = await bcrypt.hash(password, 12);
-
-  db.prepare(`
-    INSERT INTO users(
-      name,
-      phone,
-      password,
-      role
-    )
-    VALUES(?,?,?,'admin')
-  `).run(
-    name,
-    phone,
-    hash
-  );
-
-  console.log(
-    "Admin account created successfully."
-  );
 }
 
 /* =========================
    AUTH
 ========================= */
 
-app.post(
-  "/api/register",
-  authLimiter,
-  async (req, res) => {
-    try {
-      const name = cleanText(req.body.name, 60);
-      const phone = cleanPhone(req.body.phone);
-      const password = req.body.password;
+app.post("/api/register", authLimiter, async (req, res) => {
+  try {
+    const name = String(req.body.name || "").trim();
+    const phone = String(req.body.phone || "").trim();
+    const password = String(req.body.password || "");
 
-      if (!name) {
-        return res.status(400).json({
-          error: "الاسم مطلوب."
-        });
-      }
+    if (name.length < 2 || name.length > 80) {
+      return res.status(400).json({
+        error: "الاسم غير صالح.",
+      });
+    }
 
-      if (!validPhone(phone)) {
-        return res.status(400).json({
-          error: "رقم الهاتف غير صالح."
-        });
-      }
+    if (!validPhone(phone)) {
+      return res.status(400).json({
+        error: "رقم الهاتف غير صالح.",
+      });
+    }
 
-      if (!validPassword(password)) {
-        return res.status(400).json({
-          error: "كلمة السر يجب أن تكون 8 أحرف على الأقل."
-        });
-      }
+    if (password.length < 8 || password.length > 100) {
+      return res.status(400).json({
+        error: "كلمة السر يجب أن تكون 8 أحرف على الأقل.",
+      });
+    }
 
-      const exists = db
-        .prepare(
-          "SELECT id FROM users WHERE phone=?"
-        )
-        .get(phone);
+    const existing = db
+      .prepare("SELECT id FROM users WHERE phone = ?")
+      .get(phone);
 
-      if (exists) {
-        return res.status(409).json({
-          error: "رقم الهاتف مسجل من قبل."
-        });
-      }
+    if (existing) {
+      return res.status(409).json({
+        error: "رقم الهاتف مسجل من قبل.",
+      });
+    }
 
-      const hash = await bcrypt.hash(
-        password,
-        12
-      );
+    const hash = await bcrypt.hash(password, 12);
 
-      const result = db
-        .prepare(
-          `
-          INSERT INTO users(
-            name,
-            phone,
-            password,
-            role
-          )
-          VALUES(?,?,?,'customer')
-          `
-        )
-        .run(
+    const result = db
+      .prepare(
+        `
+        INSERT INTO users(
           name,
           phone,
-          hash
-        );
-
-      const user = db
-        .prepare(
-          "SELECT id,name,phone,role FROM users WHERE id=?"
+          password,
+          role
         )
-        .get(result.lastInsertRowid);
+        VALUES(?,?,?,'customer')
+        `
+      )
+      .run(name, phone, hash);
 
-      const token = createToken(user);
+    const user = {
+      id: result.lastInsertRowid,
+      name,
+      phone,
+      role: "customer",
+    };
 
-      res.status(201).json({
-        message: "تم إنشاء الحساب بنجاح.",
-        token,
-        user
-      });
-    } catch (error) {
-      console.error(error);
+    const token = signToken(user);
 
-      res.status(500).json({
-        error: "حدث خطأ في إنشاء الحساب."
-      });
-    }
-  }
-);
+    res.status(201).json({
+      message: "تم إنشاء الحساب بنجاح.",
+      token,
+      user,
+    });
+  } catch (error) {
+    console.error(error);
 
-app.post(
-  "/api/login",
-  authLimiter,
-  async (req, res) => {
-    try {
-      const phone = cleanPhone(req.body.phone);
-      const password = req.body.password;
-
-      if (!validPhone(phone)) {
-        return res.status(400).json({
-          error: "رقم الهاتف غير صالح."
-        });
-      }
-
-      if (!validPassword(password)) {
-        return res.status(400).json({
-          error: "كلمة السر غير صالحة."
-        });
-      }
-
-      const user = db
-        .prepare(
-          "SELECT * FROM users WHERE phone=?"
-        )
-        .get(phone);
-
-      if (!user) {
-        return res.status(401).json({
-          error: "رقم الهاتف أو كلمة السر خاطئة."
-        });
-      }
-
-      const match = await bcrypt.compare(
-        password,
-        user.password
-      );
-
-      if (!match) {
-        return res.status(401).json({
-          error: "رقم الهاتف أو كلمة السر خاطئة."
-        });
-      }
-
-      const safeUser = {
-        id: user.id,
-        name: user.name,
-        phone: user.phone,
-        role: user.role
-      };
-
-      const token = createToken(safeUser);
-
-      res.json({
-        message: "تم تسجيل الدخول.",
-        token,
-        user: safeUser
-      });
-    } catch (error) {
-      console.error(error);
-
-      res.status(500).json({
-        error: "حدث خطأ في تسجيل الدخول."
-      });
-    }
-  }
-);
-
-app.get(
-  "/api/me",
-  auth,
-  (req, res) => {
-    res.json({
-      user: req.user
+    res.status(500).json({
+      error: "حدث خطأ في التسجيل.",
     });
   }
-);
+});
+
+app.post("/api/login", authLimiter, async (req, res) => {
+  try {
+    const phone = String(req.body.phone || "").trim();
+    const password = String(req.body.password || "");
+
+    const user = db
+      .prepare(
+        `
+        SELECT id, name, phone, password, role
+        FROM users
+        WHERE phone = ?
+        `
+      )
+      .get(phone);
+
+    if (!user) {
+      return res.status(401).json({
+        error: "رقم الهاتف أو كلمة السر غير صحيحة.",
+      });
+    }
+
+    const valid = await bcrypt.compare(
+      password,
+      user.password
+    );
+
+    if (!valid) {
+      return res.status(401).json({
+        error: "رقم الهاتف أو كلمة السر غير صحيحة.",
+      });
+    }
+
+    const safeUser = {
+      id: user.id,
+      name: user.name,
+      phone: user.phone,
+      role: user.role,
+    };
+
+    const token = signToken(safeUser);
+
+    res.json({
+      message: "تم تسجيل الدخول.",
+      token,
+      user: safeUser,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      error: "حدث خطأ في تسجيل الدخول.",
+    });
+  }
+});
+
+app.get("/api/me", auth, (req, res) => {
+  res.json({
+    user: req.user,
+  });
+});
 
 /* =========================
    RESTAURANTS
 ========================= */
 
-app.get(
-  "/api/restaurants",
-  (req, res) => {
-    const restaurants = db
-      .prepare(
-        `
-        SELECT id,name,phone,address,active
-        FROM restaurants
-        WHERE active=1
-        ORDER BY id DESC
-        `
-      )
-      .all();
+app.get("/api/restaurants", (req, res) => {
+  const restaurants = db
+    .prepare(
+      `
+      SELECT id, name, phone, address, active
+      FROM restaurants
+      WHERE active = 1
+      ORDER BY id DESC
+      `
+    )
+    .all();
 
-    res.json(restaurants);
-  }
-);
+  res.json({
+    restaurants,
+  });
+});
 
 /* =========================
    PRODUCTS
 ========================= */
 
-app.get(
-  "/api/products",
-  (req, res) => {
+app.get("/api/products", (req, res) => {
+  const products = db
+    .prepare(
+      `
+      SELECT
+        p.id,
+        p.restaurant_id,
+        p.name,
+        p.category,
+        p.price,
+        p.emoji,
+        p.active,
+        r.name AS restaurant_name
+      FROM products p
+      JOIN restaurants r
+        ON r.id = p.restaurant_id
+      WHERE p.active = 1
+        AND r.active = 1
+      ORDER BY p.id DESC
+      `
+    )
+    .all();
+
+  res.json({
+    products,
+  });
+});
+
+/* =========================
+   CREATE ORDER
+========================= */
+
+app.post("/api/orders", auth, (req, res) => {
+  try {
+    const restaurantId = Number(req.body.restaurantId);
+    const items = req.body.items;
+    const address = String(req.body.address || "").trim();
+    const phone = String(req.body.phone || "").trim();
+
+    /*
+      الموقع الجغرافي
+    */
+    const latitude = Number(req.body.latitude);
+    const longitude = Number(req.body.longitude);
+
+    if (!Number.isInteger(restaurantId) || restaurantId <= 0) {
+      return res.status(400).json({
+        error: "المطعم غير صالح.",
+      });
+    }
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({
+        error: "السلة فارغة.",
+      });
+    }
+
+    if (items.length > 50) {
+      return res.status(400).json({
+        error: "عدد المنتجات كبير.",
+      });
+    }
+
+    if (address.length < 3 || address.length > 500) {
+      return res.status(400).json({
+        error: "العنوان غير صالح.",
+      });
+    }
+
+    if (!validPhone(phone)) {
+      return res.status(400).json({
+        error: "رقم الهاتف غير صالح.",
+      });
+    }
+
+    /*
+      لازم يكون الزوج كامل:
+      latitude + longitude
+    */
+    if (
+      !Number.isFinite(latitude) ||
+      latitude < -90 ||
+      latitude > 90
+    ) {
+      return res.status(400).json({
+        error: "الموقع الجغرافي غير صالح.",
+      });
+    }
+
+    if (
+      !Number.isFinite(longitude) ||
+      longitude < -180 ||
+      longitude > 180
+    ) {
+      return res.status(400).json({
+        error: "الموقع الجغرافي غير صالح.",
+      });
+    }
+
+    const restaurant = db
+      .prepare(
+        `
+        SELECT id
+        FROM restaurants
+        WHERE id = ?
+          AND active = 1
+        `
+      )
+      .get(restaurantId);
+
+    if (!restaurant) {
+      return res.status(400).json({
+        error: "المطعم غير موجود.",
+      });
+    }
+
+    const productIds = [
+      ...new Set(
+        items.map((item) => Number(item.productId))
+      ),
+    ];
+
+    if (
+      productIds.length === 0 ||
+      productIds.some(
+        (id) => !Number.isInteger(id) || id <= 0
+      )
+    ) {
+      return res.status(400).json({
+        error: "المنتجات غير صالحة.",
+      });
+    }
+
+    const placeholders = productIds
+      .map(() => "?")
+      .join(",");
+
     const products = db
       .prepare(
         `
         SELECT
-          p.id,
-          p.restaurant_id,
-          p.name,
-          p.category,
-          p.price,
-          p.emoji,
-          p.active,
-          r.name AS restaurant
-        FROM products p
-        JOIN restaurants r
-          ON r.id=p.restaurant_id
-        WHERE p.active=1
-          AND r.active=1
-        ORDER BY p.id ASC
+          id,
+          restaurant_id,
+          name,
+          price
+        FROM products
+        WHERE id IN (${placeholders})
+          AND active = 1
         `
       )
-      .all();
+      .all(...productIds);
 
-    res.json(products);
-  }
-);
-
-/* =========================
-   ORDERS
-========================= */
-
-app.post(
-  "/api/orders",
-  auth,
-  (req, res) => {
-    try {
-      const items = req.body.items;
-      const address = cleanText(
-        req.body.address,
-        300
-      );
-      const phone = cleanPhone(
-        req.body.phone || req.user.phone
-      );
-
-      if (!Array.isArray(items) || items.length === 0) {
-        return res.status(400).json({
-          error: "السلة فارغة."
-        });
-      }
-
-      if (!address) {
-        return res.status(400).json({
-          error: "العنوان مطلوب."
-        });
-      }
-
-      if (!validPhone(phone)) {
-        return res.status(400).json({
-          error: "رقم الهاتف غير صالح."
-        });
-      }
-
-      if (items.length > 50) {
-        return res.status(400).json({
-          error: "عدد المنتجات كبير."
-        });
-      }
-
-      const ids = items.map((item) =>
-        Number(item.product_id || item.id)
-      );
-
-      if (ids.some((id) => !Number.isInteger(id) || id <= 0)) {
-        return res.status(400).json({
-          error: "منتج غير صالح."
-        });
-      }
-
-      const uniqueIds = [...new Set(ids)];
-
-      const placeholders = uniqueIds
-        .map(() => "?")
-        .join(",");
-
-      const products = db
-        .prepare(
-          `
-          SELECT *
-          FROM products
-          WHERE id IN (${placeholders})
-            AND active=1
-          `
-        )
-        .all(...uniqueIds);
-
-      if (products.length !== uniqueIds.length) {
-        return res.status(400).json({
-          error: "يوجد منتج غير متوفر."
-        });
-      }
-
-      const restaurantId =
-        products[0].restaurant_id;
-
-      if (
-        products.some(
-          (product) =>
-            product.restaurant_id !== restaurantId
-        )
-      ) {
-        return res.status(400).json({
-          error:
-            "لا يمكن الطلب من أكثر من مطعم في نفس الطلب."
-        });
-      }
-
-      const productMap = new Map(
-        products.map((product) => [
-          product.id,
-          product
-        ])
-      );
-
-      const finalItems = [];
-      let subtotal = 0;
-
-      for (const item of items) {
-        const productId = Number(
-          item.product_id || item.id
-        );
-
-        const quantity = Number(
-          item.quantity || 1
-        );
-
-        if (
-          !Number.isInteger(quantity) ||
-          quantity < 1 ||
-          quantity > 20
-        ) {
-          return res.status(400).json({
-            error: "كمية غير صالحة."
-          });
-        }
-
-        const product =
-          productMap.get(productId);
-
-        if (!product) {
-          return res.status(400).json({
-            error: "منتج غير موجود."
-          });
-        }
-
-        const lineTotal =
-          product.price * quantity;
-
-        subtotal += lineTotal;
-
-        finalItems.push({
-          product_id: product.id,
-          name: product.name,
-          price: product.price,
-          quantity,
-          emoji: product.emoji
-        });
-      }
-
-      const deliveryFee = 300;
-      const total = subtotal + deliveryFee;
-
-      const result = db
-        .prepare(
-          `
-          INSERT INTO orders(
-            user_id,
-            restaurant_id,
-            items,
-            total,
-            delivery_fee,
-            address,
-            phone,
-            status
-          )
-          VALUES(?,?,?,?,?,?,?,'received')
-          `
-        )
-        .run(
-          req.user.id,
-          restaurantId,
-          JSON.stringify(finalItems),
-          total,
-          deliveryFee,
-          address,
-          phone
-        );
-
-      res.status(201).json({
-        message: "تم إرسال الطلب بنجاح.",
-        order: {
-          id: result.lastInsertRowid,
-          subtotal,
-          delivery_fee: deliveryFee,
-          total,
-          status: "received"
-        }
-      });
-    } catch (error) {
-      console.error(error);
-
-      res.status(500).json({
-        error: "حدث خطأ أثناء إنشاء الطلب."
+    if (products.length !== productIds.length) {
+      return res.status(400).json({
+        error: "بعض المنتجات غير موجودة.",
       });
     }
-  }
-);
 
-app.get(
-  "/api/orders",
-  auth,
-  (req, res) => {
+    const productMap = new Map(
+      products.map((product) => [
+        product.id,
+        product,
+      ])
+    );
+
+    let subtotal = 0;
+
+    const cleanItems = [];
+
+    for (const item of items) {
+      const productId = Number(item.productId);
+      const quantity = Number(item.quantity);
+
+      if (
+        !Number.isInteger(quantity) ||
+        quantity < 1 ||
+        quantity > 20
+      ) {
+        return res.status(400).json({
+          error: "كمية المنتج غير صالحة.",
+        });
+      }
+
+      const product = productMap.get(productId);
+
+      if (!product) {
+        return res.status(400).json({
+          error: "المنتج غير موجود.",
+        });
+      }
+
+      if (product.restaurant_id !== restaurantId) {
+        return res.status(400).json({
+          error: "لا يمكن الطلب من مطاعم مختلفة.",
+        });
+      }
+
+      const lineTotal = product.price * quantity;
+
+      subtotal += lineTotal;
+
+      cleanItems.push({
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        quantity,
+        total: lineTotal,
+      });
+    }
+
+    const deliveryFee = 300;
+    const total = subtotal + deliveryFee;
+
+    const result = db
+      .prepare(
+        `
+        INSERT INTO orders(
+          user_id,
+          restaurant_id,
+          items,
+          total,
+          delivery_fee,
+          address,
+          phone,
+          latitude,
+          longitude,
+          status
+        )
+        VALUES(?,?,?,?,?,?,?,?,?,'received')
+        `
+      )
+      .run(
+        req.user.id,
+        restaurantId,
+        JSON.stringify(cleanItems),
+        total,
+        deliveryFee,
+        address,
+        phone,
+        latitude,
+        longitude
+      );
+
+    const order = db
+      .prepare(
+        `
+        SELECT *
+        FROM orders
+        WHERE id = ?
+        `
+      )
+      .get(result.lastInsertRowid);
+
+    res.status(201).json({
+      message: "تم إنشاء الطلب بنجاح.",
+      order,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      error: "حدث خطأ أثناء إنشاء الطلب.",
+    });
+  }
+});
+
+/* =========================
+   CUSTOMER ORDERS
+========================= */
+
+app.get("/api/orders", auth, (req, res) => {
+  try {
     let orders;
 
     if (
@@ -775,12 +722,12 @@ app.get(
             o.*,
             u.name AS customer_name,
             u.phone AS customer_phone,
-            r.name AS restaurant
+            r.name AS restaurant_name
           FROM orders o
           JOIN users u
-            ON u.id=o.user_id
-          LEFT JOIN restaurants r
-            ON r.id=o.restaurant_id
+            ON u.id = o.user_id
+          JOIN restaurants r
+            ON r.id = o.restaurant_id
           ORDER BY o.id DESC
           `
         )
@@ -791,28 +738,31 @@ app.get(
           `
           SELECT
             o.*,
-            r.name AS restaurant
+            r.name AS restaurant_name
           FROM orders o
-          LEFT JOIN restaurants r
-            ON r.id=o.restaurant_id
-          WHERE o.user_id=?
+          JOIN restaurants r
+            ON r.id = o.restaurant_id
+          WHERE o.user_id = ?
           ORDER BY o.id DESC
           `
         )
         .all(req.user.id);
     }
 
-    const result = orders.map((order) => ({
-      ...order,
-      items: JSON.parse(order.items)
-    }));
+    res.json({
+      orders,
+    });
+  } catch (error) {
+    console.error(error);
 
-    res.json(result);
+    res.status(500).json({
+      error: "تعذر جلب الطلبات.",
+    });
   }
-);
+});
 
 /* =========================
-   ORDER STATUS
+   UPDATE ORDER STATUS
 ========================= */
 
 const allowedStatuses = [
@@ -821,48 +771,75 @@ const allowedStatuses = [
   "pickup",
   "on_the_way",
   "delivered",
-  "cancelled"
+  "cancelled",
 ];
 
 app.patch(
   "/api/orders/:id/status",
   auth,
-  staffOnly,
+  adminOrDriver,
   (req, res) => {
-    const id = Number(req.params.id);
-    const status = cleanText(
-      req.body.status,
-      30
-    );
+    try {
+      const orderId = Number(req.params.id);
+      const status = String(req.body.status || "");
 
-    if (!Number.isInteger(id) || id <= 0) {
-      return res.status(400).json({
-        error: "رقم الطلب غير صالح."
+      if (!Number.isInteger(orderId) || orderId <= 0) {
+        return res.status(400).json({
+          error: "رقم الطلب غير صالح.",
+        });
+      }
+
+      if (!allowedStatuses.includes(status)) {
+        return res.status(400).json({
+          error: "حالة الطلب غير صالحة.",
+        });
+      }
+
+      const order = db
+        .prepare(
+          `
+          SELECT id
+          FROM orders
+          WHERE id = ?
+          `
+        )
+        .get(orderId);
+
+      if (!order) {
+        return res.status(404).json({
+          error: "الطلب غير موجود.",
+        });
+      }
+
+      db.prepare(
+        `
+        UPDATE orders
+        SET status = ?
+        WHERE id = ?
+        `
+      ).run(status, orderId);
+
+      const updatedOrder = db
+        .prepare(
+          `
+          SELECT *
+          FROM orders
+          WHERE id = ?
+          `
+        )
+        .get(orderId);
+
+      res.json({
+        message: "تم تحديث حالة الطلب.",
+        order: updatedOrder,
+      });
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        error: "تعذر تحديث حالة الطلب.",
       });
     }
-
-    if (!allowedStatuses.includes(status)) {
-      return res.status(400).json({
-        error: "حالة الطلب غير صالحة."
-      });
-    }
-
-    const result = db
-      .prepare(
-        "UPDATE orders SET status=? WHERE id=?"
-      )
-      .run(status, id);
-
-    if (!result.changes) {
-      return res.status(404).json({
-        error: "الطلب غير موجود."
-      });
-    }
-
-    res.json({
-      message: "تم تحديث حالة الطلب.",
-      status
-    });
   }
 );
 
@@ -875,111 +852,83 @@ app.get(
   auth,
   adminOnly,
   (req, res) => {
-    const orders = db
-      .prepare(
-        "SELECT COUNT(*) AS c FROM orders"
-      )
-      .get().c;
-
-    const deliveredRevenue = db
-      .prepare(
-        `
-        SELECT COALESCE(SUM(total),0) AS total
-        FROM orders
-        WHERE status='delivered'
-        `
-      )
-      .get().total;
-
-    const customers = db
-      .prepare(
-        `
-        SELECT COUNT(*) AS c
-        FROM users
-        WHERE role='customer'
-        `
-      )
-      .get().c;
-
-    const drivers = db
-      .prepare(
-        `
-        SELECT COUNT(*) AS c
-        FROM users
-        WHERE role='driver'
-        `
-      )
-      .get().c;
-
-    const restaurants = db
-      .prepare(
-        `
-        SELECT COUNT(*) AS c
-        FROM restaurants
-        WHERE active=1
-        `
-      )
-      .get().c;
-
-    const pending = db
-      .prepare(
-        `
-        SELECT COUNT(*) AS c
-        FROM orders
-        WHERE status IN(
-          'received',
-          'preparing',
-          'pickup',
-          'on_the_way'
+    try {
+      const orders = db
+        .prepare(
+          "SELECT COUNT(*) AS count FROM orders"
         )
-        `
-      )
-      .get().c;
+        .get().count;
 
-    res.json({
-      orders,
-      deliveredRevenue,
-      customers,
-      drivers,
-      restaurants,
-      pending
-    });
-  }
-);
+      const deliveredRevenue = db
+        .prepare(
+          `
+          SELECT COALESCE(SUM(total), 0) AS total
+          FROM orders
+          WHERE status = 'delivered'
+          `
+        )
+        .get().total;
 
-/* =========================
-   ADMIN ORDERS
-========================= */
+      const customers = db
+        .prepare(
+          `
+          SELECT COUNT(*) AS count
+          FROM users
+          WHERE role = 'customer'
+          `
+        )
+        .get().count;
 
-app.get(
-  "/api/admin/orders",
-  auth,
-  adminOnly,
-  (req, res) => {
-    const orders = db
-      .prepare(
-        `
-        SELECT
-          o.*,
-          u.name AS customer_name,
-          u.phone AS customer_phone,
-          r.name AS restaurant
-        FROM orders o
-        JOIN users u
-          ON u.id=o.user_id
-        LEFT JOIN restaurants r
-          ON r.id=o.restaurant_id
-        ORDER BY o.id DESC
-        `
-      )
-      .all();
+      const restaurants = db
+        .prepare(
+          `
+          SELECT COUNT(*) AS count
+          FROM restaurants
+          WHERE active = 1
+          `
+        )
+        .get().count;
 
-    res.json(
-      orders.map((order) => ({
-        ...order,
-        items: JSON.parse(order.items)
-      }))
-    );
+      const drivers = db
+        .prepare(
+          `
+          SELECT COUNT(*) AS count
+          FROM users
+          WHERE role = 'driver'
+          `
+        )
+        .get().count;
+
+      const pending = db
+        .prepare(
+          `
+          SELECT COUNT(*) AS count
+          FROM orders
+          WHERE status IN(
+            'received',
+            'preparing',
+            'pickup',
+            'on_the_way'
+          )
+          `
+        )
+        .get().count;
+
+      res.json({
+        orders,
+        deliveredRevenue,
+        customers,
+        restaurants,
+        drivers,
+        pending,
+      });
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        error: "تعذر جلب الإحصائيات.",
+      });
+    }
   }
 );
 
@@ -999,63 +948,16 @@ app.get(
           id,
           name,
           phone,
-          role
+          role,
+          created_at
         FROM users
         ORDER BY id DESC
         `
       )
       .all();
 
-    res.json(users);
-  }
-);
-
-app.patch(
-  "/api/admin/users/:id/role",
-  auth,
-  adminOnly,
-  (req, res) => {
-    const id = Number(req.params.id);
-    const role = cleanText(
-      req.body.role,
-      20
-    );
-
-    if (!Number.isInteger(id) || id <= 0) {
-      return res.status(400).json({
-        error: "معرف المستخدم غير صالح."
-      });
-    }
-
-    if (
-      !["customer", "driver", "admin"].includes(role)
-    ) {
-      return res.status(400).json({
-        error: "الدور غير صالح."
-      });
-    }
-
-    if (id === req.user.id) {
-      return res.status(400).json({
-        error:
-          "لا يمكنك تغيير دور حسابك الحالي."
-      });
-    }
-
-    const result = db
-      .prepare(
-        "UPDATE users SET role=? WHERE id=?"
-      )
-      .run(role, id);
-
-    if (!result.changes) {
-      return res.status(404).json({
-        error: "المستخدم غير موجود."
-      });
-    }
-
     res.json({
-      message: "تم تحديث دور المستخدم."
+      users,
     });
   }
 );
@@ -1074,16 +976,18 @@ app.get(
         `
         SELECT
           p.*,
-          r.name AS restaurant
+          r.name AS restaurant_name
         FROM products p
         JOIN restaurants r
-          ON r.id=p.restaurant_id
+          ON r.id = p.restaurant_id
         ORDER BY p.id DESC
         `
       )
       .all();
 
-    res.json(products);
+    res.json({
+      products,
+    });
   }
 );
 
@@ -1092,79 +996,100 @@ app.post(
   auth,
   adminOnly,
   (req, res) => {
-    const name = cleanText(
-      req.body.name,
-      100
-    );
-
-    const category = cleanText(
-      req.body.category,
-      60
-    );
-
-    const price = Number(req.body.price);
-    const emoji = cleanText(
-      req.body.emoji || "🍽️",
-      10
-    );
-
-    const restaurantId = Number(
-      req.body.restaurant_id || 1
-    );
-
-    if (!name) {
-      return res.status(400).json({
-        error: "اسم المنتج مطلوب."
-      });
-    }
-
-    if (
-      !Number.isInteger(price) ||
-      price <= 0 ||
-      price > 10000000
-    ) {
-      return res.status(400).json({
-        error: "السعر غير صالح."
-      });
-    }
-
-    const restaurant = db
-      .prepare(
-        "SELECT id FROM restaurants WHERE id=? AND active=1"
-      )
-      .get(restaurantId);
-
-    if (!restaurant) {
-      return res.status(400).json({
-        error: "المطعم غير موجود."
-      });
-    }
-
-    const result = db
-      .prepare(
-        `
-        INSERT INTO products(
-          restaurant_id,
-          name,
-          category,
-          price,
-          emoji
-        )
-        VALUES(?,?,?,?,?)
-        `
-      )
-      .run(
-        restaurantId,
-        name,
-        category,
-        price,
-        emoji
+    try {
+      const restaurantId = Number(
+        req.body.restaurantId
       );
 
-    res.status(201).json({
-      message: "تمت إضافة المنتج.",
-      id: result.lastInsertRowid
-    });
+      const name = String(
+        req.body.name || ""
+      ).trim();
+
+      const category = String(
+        req.body.category || ""
+      ).trim();
+
+      const price = Number(req.body.price);
+
+      const emoji = String(
+        req.body.emoji || "🍔"
+      ).trim();
+
+      if (
+        !Number.isInteger(restaurantId) ||
+        restaurantId <= 0
+      ) {
+        return res.status(400).json({
+          error: "المطعم غير صالح.",
+        });
+      }
+
+      if (name.length < 2 || name.length > 100) {
+        return res.status(400).json({
+          error: "اسم المنتج غير صالح.",
+        });
+      }
+
+      if (
+        !Number.isFinite(price) ||
+        price <= 0 ||
+        price > 1000000
+      ) {
+        return res.status(400).json({
+          error: "السعر غير صالح.",
+        });
+      }
+
+      const restaurant = db
+        .prepare(
+          `
+          SELECT id
+          FROM restaurants
+          WHERE id = ?
+            AND active = 1
+          `
+        )
+        .get(restaurantId);
+
+      if (!restaurant) {
+        return res.status(400).json({
+          error: "المطعم غير موجود.",
+        });
+      }
+
+      const result = db
+        .prepare(
+          `
+          INSERT INTO products(
+            restaurant_id,
+            name,
+            category,
+            price,
+            emoji,
+            active
+          )
+          VALUES(?,?,?,?,?,1)
+          `
+        )
+        .run(
+          restaurantId,
+          name,
+          category || "other",
+          Math.round(price),
+          emoji
+        );
+
+      res.status(201).json({
+        message: "تمت إضافة المنتج.",
+        id: result.lastInsertRowid,
+      });
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        error: "تعذر إضافة المنتج.",
+      });
+    }
   }
 );
 
@@ -1173,89 +1098,125 @@ app.patch(
   auth,
   adminOnly,
   (req, res) => {
-    const id = Number(req.params.id);
+    try {
+      const id = Number(req.params.id);
 
-    if (!Number.isInteger(id) || id <= 0) {
-      return res.status(400).json({
-        error: "معرف المنتج غير صالح."
+      const name =
+        req.body.name !== undefined
+          ? String(req.body.name).trim()
+          : undefined;
+
+      const category =
+        req.body.category !== undefined
+          ? String(req.body.category).trim()
+          : undefined;
+
+      const price =
+        req.body.price !== undefined
+          ? Number(req.body.price)
+          : undefined;
+
+      const emoji =
+        req.body.emoji !== undefined
+          ? String(req.body.emoji).trim()
+          : undefined;
+
+      const active =
+        req.body.active !== undefined
+          ? Boolean(req.body.active)
+          : undefined;
+
+      const existing = db
+        .prepare(
+          `
+          SELECT *
+          FROM products
+          WHERE id = ?
+          `
+        )
+        .get(id);
+
+      if (!existing) {
+        return res.status(404).json({
+          error: "المنتج غير موجود.",
+        });
+      }
+
+      const finalName =
+        name !== undefined
+          ? name
+          : existing.name;
+
+      const finalCategory =
+        category !== undefined
+          ? category
+          : existing.category;
+
+      const finalPrice =
+        price !== undefined
+          ? price
+          : existing.price;
+
+      const finalEmoji =
+        emoji !== undefined
+          ? emoji
+          : existing.emoji;
+
+      const finalActive =
+        active !== undefined
+          ? active
+            ? 1
+            : 0
+          : existing.active;
+
+      if (
+        finalName.length < 2 ||
+        finalName.length > 100
+      ) {
+        return res.status(400).json({
+          error: "اسم المنتج غير صالح.",
+        });
+      }
+
+      if (
+        !Number.isFinite(finalPrice) ||
+        finalPrice <= 0
+      ) {
+        return res.status(400).json({
+          error: "السعر غير صالح.",
+        });
+      }
+
+      db.prepare(
+        `
+        UPDATE products
+        SET
+          name = ?,
+          category = ?,
+          price = ?,
+          emoji = ?,
+          active = ?
+        WHERE id = ?
+        `
+      ).run(
+        finalName,
+        finalCategory,
+        Math.round(finalPrice),
+        finalEmoji,
+        finalActive,
+        id
+      );
+
+      res.json({
+        message: "تم تحديث المنتج.",
+      });
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        error: "تعذر تحديث المنتج.",
       });
     }
-
-    const existing = db
-      .prepare(
-        "SELECT * FROM products WHERE id=?"
-      )
-      .get(id);
-
-    if (!existing) {
-      return res.status(404).json({
-        error: "المنتج غير موجود."
-      });
-    }
-
-    const name =
-      req.body.name !== undefined
-        ? cleanText(req.body.name, 100)
-        : existing.name;
-
-    const category =
-      req.body.category !== undefined
-        ? cleanText(req.body.category, 60)
-        : existing.category;
-
-    const price =
-      req.body.price !== undefined
-        ? Number(req.body.price)
-        : existing.price;
-
-    const emoji =
-      req.body.emoji !== undefined
-        ? cleanText(req.body.emoji, 10)
-        : existing.emoji;
-
-    const active =
-      req.body.active !== undefined
-        ? Number(req.body.active) ? 1 : 0
-        : existing.active;
-
-    if (!name) {
-      return res.status(400).json({
-        error: "اسم المنتج مطلوب."
-      });
-    }
-
-    if (
-      !Number.isInteger(price) ||
-      price <= 0
-    ) {
-      return res.status(400).json({
-        error: "السعر غير صالح."
-      });
-    }
-
-    db.prepare(
-      `
-      UPDATE products
-      SET
-        name=?,
-        category=?,
-        price=?,
-        emoji=?,
-        active=?
-      WHERE id=?
-      `
-    ).run(
-      name,
-      category,
-      price,
-      emoji,
-      active,
-      id
-    );
-
-    res.json({
-      message: "تم تحديث المنتج."
-    });
   }
 );
 
@@ -1264,29 +1225,35 @@ app.delete(
   auth,
   adminOnly,
   (req, res) => {
-    const id = Number(req.params.id);
+    try {
+      const id = Number(req.params.id);
 
-    if (!Number.isInteger(id) || id <= 0) {
-      return res.status(400).json({
-        error: "معرف المنتج غير صالح."
+      const result = db
+        .prepare(
+          `
+          UPDATE products
+          SET active = 0
+          WHERE id = ?
+          `
+        )
+        .run(id);
+
+      if (result.changes === 0) {
+        return res.status(404).json({
+          error: "المنتج غير موجود.",
+        });
+      }
+
+      res.json({
+        message: "تم تعطيل المنتج.",
+      });
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        error: "تعذر حذف المنتج.",
       });
     }
-
-    const result = db
-      .prepare(
-        "UPDATE products SET active=0 WHERE id=?"
-      )
-      .run(id);
-
-    if (!result.changes) {
-      return res.status(404).json({
-        error: "المنتج غير موجود."
-      });
-    }
-
-    res.json({
-      message: "تم تعطيل المنتج."
-    });
   }
 );
 
@@ -1309,7 +1276,9 @@ app.get(
       )
       .all();
 
-    res.json(restaurants);
+    res.json({
+      restaurants,
+    });
   }
 );
 
@@ -1318,57 +1287,72 @@ app.post(
   auth,
   adminOnly,
   (req, res) => {
-    const name = cleanText(
-      req.body.name,
-      100
-    );
+    try {
+      const name = String(
+        req.body.name || ""
+      ).trim();
 
-    const phone = cleanPhone(
-      req.body.phone || ""
-    );
+      const phone = String(
+        req.body.phone || ""
+      ).trim();
 
-    const address = cleanText(
-      req.body.address || "",
-      300
-    );
+      const address = String(
+        req.body.address || ""
+      ).trim();
 
-    if (!name) {
-      return res.status(400).json({
-        error: "اسم المطعم مطلوب."
-      });
-    }
+      if (
+        name.length < 2 ||
+        name.length > 100
+      ) {
+        return res.status(400).json({
+          error: "اسم المطعم غير صالح.",
+        });
+      }
 
-    if (
-      phone &&
-      !validPhone(phone)
-    ) {
-      return res.status(400).json({
-        error: "رقم الهاتف غير صالح."
-      });
-    }
+      if (!validPhone(phone)) {
+        return res.status(400).json({
+          error: "رقم الهاتف غير صالح.",
+        });
+      }
 
-    const result = db
-      .prepare(
-        `
-        INSERT INTO restaurants(
+      if (
+        address.length < 2 ||
+        address.length > 300
+      ) {
+        return res.status(400).json({
+          error: "العنوان غير صالح.",
+        });
+      }
+
+      const result = db
+        .prepare(
+          `
+          INSERT INTO restaurants(
+            name,
+            phone,
+            address,
+            active
+          )
+          VALUES(?,?,?,1)
+          `
+        )
+        .run(
           name,
           phone,
-          address,
-          active
-        )
-        VALUES(?,?,?,1)
-        `
-      )
-      .run(
-        name,
-        phone,
-        address
-      );
+          address
+        );
 
-    res.status(201).json({
-      message: "تمت إضافة المطعم.",
-      id: result.lastInsertRowid
-    });
+      res.status(201).json({
+        message: "تمت إضافة المطعم.",
+        id: result.lastInsertRowid,
+      });
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        error: "تعذر إضافة المطعم.",
+      });
+    }
   }
 );
 
@@ -1377,82 +1361,99 @@ app.patch(
   auth,
   adminOnly,
   (req, res) => {
-    const id = Number(req.params.id);
+    try {
+      const id = Number(req.params.id);
 
-    if (!Number.isInteger(id) || id <= 0) {
-      return res.status(400).json({
-        error: "معرف المطعم غير صالح."
+      const existing = db
+        .prepare(
+          `
+          SELECT *
+          FROM restaurants
+          WHERE id = ?
+          `
+        )
+        .get(id);
+
+      if (!existing) {
+        return res.status(404).json({
+          error: "المطعم غير موجود.",
+        });
+      }
+
+      const name =
+        req.body.name !== undefined
+          ? String(req.body.name).trim()
+          : existing.name;
+
+      const phone =
+        req.body.phone !== undefined
+          ? String(req.body.phone).trim()
+          : existing.phone;
+
+      const address =
+        req.body.address !== undefined
+          ? String(req.body.address).trim()
+          : existing.address;
+
+      const active =
+        req.body.active !== undefined
+          ? Boolean(req.body.active)
+            ? 1
+            : 0
+          : existing.active;
+
+      if (
+        name.length < 2 ||
+        name.length > 100
+      ) {
+        return res.status(400).json({
+          error: "اسم المطعم غير صالح.",
+        });
+      }
+
+      if (!validPhone(phone)) {
+        return res.status(400).json({
+          error: "رقم الهاتف غير صالح.",
+        });
+      }
+
+      if (
+        address.length < 2 ||
+        address.length > 300
+      ) {
+        return res.status(400).json({
+          error: "العنوان غير صالح.",
+        });
+      }
+
+      db.prepare(
+        `
+        UPDATE restaurants
+        SET
+          name = ?,
+          phone = ?,
+          address = ?,
+          active = ?
+        WHERE id = ?
+        `
+      ).run(
+        name,
+        phone,
+        address,
+        active,
+        id
+      );
+
+      res.json({
+        message: "تم تحديث المطعم.",
+      });
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        error: "تعذر تحديث المطعم.",
       });
     }
-
-    const existing = db
-      .prepare(
-        "SELECT * FROM restaurants WHERE id=?"
-      )
-      .get(id);
-
-    if (!existing) {
-      return res.status(404).json({
-        error: "المطعم غير موجود."
-      });
-    }
-
-    const name =
-      req.body.name !== undefined
-        ? cleanText(req.body.name, 100)
-        : existing.name;
-
-    const phone =
-      req.body.phone !== undefined
-        ? cleanPhone(req.body.phone)
-        : existing.phone;
-
-    const address =
-      req.body.address !== undefined
-        ? cleanText(req.body.address, 300)
-        : existing.address;
-
-    const active =
-      req.body.active !== undefined
-        ? Number(req.body.active) ? 1 : 0
-        : existing.active;
-
-    if (!name) {
-      return res.status(400).json({
-        error: "اسم المطعم مطلوب."
-      });
-    }
-
-    if (
-      phone &&
-      !validPhone(phone)
-    ) {
-      return res.status(400).json({
-        error: "رقم الهاتف غير صالح."
-      });
-    }
-
-    db.prepare(
-      `
-      UPDATE restaurants
-      SET
-        name=?,
-        phone=?,
-        address=?,
-        active=?
-      WHERE id=?
-      `
-    ).run(
-      name,
-      phone,
-      address,
-      active,
-      id
-    );
-
-    res.json({
-      message: "تم تحديث المطعم."
-    });
   }
 );
 
@@ -1461,52 +1462,100 @@ app.delete(
   auth,
   adminOnly,
   (req, res) => {
-    const id = Number(req.params.id);
+    try {
+      const id = Number(req.params.id);
 
-    if (!Number.isInteger(id) || id <= 0) {
-      return res.status(400).json({
-        error: "معرف المطعم غير صالح."
+      const activeProducts = db
+        .prepare(
+          `
+          SELECT COUNT(*) AS count
+          FROM products
+          WHERE restaurant_id = ?
+            AND active = 1
+          `
+        )
+        .get(id).count;
+
+      if (activeProducts > 0) {
+        return res.status(400).json({
+          error:
+            "لا يمكن تعطيل المطعم قبل تعطيل منتجاته.",
+        });
+      }
+
+      const result = db
+        .prepare(
+          `
+          UPDATE restaurants
+          SET active = 0
+          WHERE id = ?
+          `
+        )
+        .run(id);
+
+      if (result.changes === 0) {
+        return res.status(404).json({
+          error: "المطعم غير موجود.",
+        });
+      }
+
+      res.json({
+        message: "تم تعطيل المطعم.",
+      });
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        error: "تعذر تعطيل المطعم.",
       });
     }
-
-    const activeProducts = db
-      .prepare(
-        `
-        SELECT COUNT(*) AS c
-        FROM products
-        WHERE restaurant_id=?
-          AND active=1
-        `
-      )
-      .get(id).c;
-
-    if (activeProducts > 0) {
-      return res.status(400).json({
-        error:
-          "عطّل منتجات المطعم أولاً."
-      });
-    }
-
-    const result = db
-      .prepare(
-        "UPDATE restaurants SET active=0 WHERE id=?"
-      )
-      .run(id);
-
-    if (!result.changes) {
-      return res.status(404).json({
-        error: "المطعم غير موجود."
-      });
-    }
-
-    res.json({
-      message: "تم تعطيل المطعم."
-    });
   }
 );
 
 /* =========================
-   ADMIN DRIVERS
+   ADMIN / DRIVER ORDERS
+========================= */
+
+app.get(
+  "/api/admin/orders",
+  auth,
+  adminOrDriver,
+  (req, res) => {
+    try {
+      const orders = db
+        .prepare(
+          `
+          SELECT
+            o.*,
+            u.name AS customer_name,
+            u.phone AS customer_phone,
+            r.name AS restaurant_name,
+            r.address AS restaurant_address
+          FROM orders o
+          JOIN users u
+            ON u.id = o.user_id
+          JOIN restaurants r
+            ON r.id = o.restaurant_id
+          ORDER BY o.id DESC
+          `
+        )
+        .all();
+
+      res.json({
+        orders,
+      });
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        error: "تعذر جلب الطلبات.",
+      });
+    }
+  }
+);
+
+/* =========================
+   DRIVERS
 ========================= */
 
 app.post(
@@ -1515,46 +1564,52 @@ app.post(
   adminOnly,
   async (req, res) => {
     try {
-      const name = cleanText(
-        req.body.name,
-        60
+      const name = String(
+        req.body.name || ""
+      ).trim();
+
+      const phone = String(
+        req.body.phone || ""
+      ).trim();
+
+      const password = String(
+        req.body.password || ""
       );
 
-      const phone = cleanPhone(
-        req.body.phone
-      );
-
-      const password =
-        req.body.password;
-
-      if (!name) {
+      if (
+        name.length < 2 ||
+        name.length > 80
+      ) {
         return res.status(400).json({
-          error: "الاسم مطلوب."
+          error: "اسم السائق غير صالح.",
         });
       }
 
       if (!validPhone(phone)) {
         return res.status(400).json({
-          error: "رقم الهاتف غير صالح."
+          error: "رقم الهاتف غير صالح.",
         });
       }
 
-      if (!validPassword(password)) {
+      if (
+        password.length < 8 ||
+        password.length > 100
+      ) {
         return res.status(400).json({
           error:
-            "كلمة السر يجب أن تكون 8 أحرف على الأقل."
+            "كلمة السر يجب أن تكون 8 أحرف على الأقل.",
         });
       }
 
-      const exists = db
+      const existing = db
         .prepare(
-          "SELECT id FROM users WHERE phone=?"
+          "SELECT id FROM users WHERE phone = ?"
         )
         .get(phone);
 
-      if (exists) {
+      if (existing) {
         return res.status(409).json({
-          error: "رقم الهاتف مسجل من قبل."
+          error: "رقم الهاتف مسجل من قبل.",
         });
       }
 
@@ -1583,13 +1638,73 @@ app.post(
 
       res.status(201).json({
         message: "تم إنشاء حساب السائق.",
-        id: result.lastInsertRowid
+        id: result.lastInsertRowid,
       });
     } catch (error) {
       console.error(error);
 
       res.status(500).json({
-        error: "حدث خطأ أثناء إنشاء السائق."
+        error: "تعذر إنشاء السائق.",
+      });
+    }
+  }
+);
+
+/* =========================
+   CHANGE USER ROLE
+========================= */
+
+app.patch(
+  "/api/admin/users/:id/role",
+  auth,
+  adminOnly,
+  (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      const role = String(req.body.role || "");
+
+      const allowedRoles = [
+        "customer",
+        "driver",
+        "admin",
+      ];
+
+      if (!allowedRoles.includes(role)) {
+        return res.status(400).json({
+          error: "الدور غير صالح.",
+        });
+      }
+
+      if (id === req.user.id) {
+        return res.status(400).json({
+          error: "لا يمكنك تغيير دور حسابك بنفسك.",
+        });
+      }
+
+      const result = db
+        .prepare(
+          `
+          UPDATE users
+          SET role = ?
+          WHERE id = ?
+          `
+        )
+        .run(role, id);
+
+      if (result.changes === 0) {
+        return res.status(404).json({
+          error: "المستخدم غير موجود.",
+        });
+      }
+
+      res.json({
+        message: "تم تغيير دور المستخدم.",
+      });
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        error: "تعذر تغيير الدور.",
       });
     }
   }
@@ -1599,51 +1714,120 @@ app.post(
    HEALTH
 ========================= */
 
-app.get(
-  "/api/health",
-  (req, res) => {
-    res.json({
-      ok: true,
-      service: "Djalil Delivery"
-    });
-  }
-);
+app.get("/api/health", (req, res) => {
+  res.json({
+    ok: true,
+    service: "Djalil Delivery",
+  });
+});
 
 /* =========================
-   STATIC WEBSITE
+   ADMIN SETUP
 ========================= */
 
-app.use(
-  express.static(
-    path.join(__dirname, "public")
-  )
-);
+async function setupAdmin() {
+  const name = String(
+    process.env.ADMIN_NAME || ""
+  ).trim();
 
-app.get(
-  "*",
-  (req, res) => {
-    res.sendFile(
-      path.join(
-        __dirname,
-        "public",
-        "index.html"
-      )
+  const phone = String(
+    process.env.ADMIN_PHONE || ""
+  ).trim();
+
+  const password = String(
+    process.env.ADMIN_PASSWORD || ""
+  );
+
+  if (!name || !phone || !password) {
+    console.warn(
+      "Admin environment variables are not fully configured."
     );
+    return;
   }
-);
+
+  if (!validPhone(phone)) {
+    console.warn(
+      "ADMIN_PHONE is invalid."
+    );
+    return;
+  }
+
+  if (
+    password.length < 8 ||
+    password.length > 100
+  ) {
+    console.warn(
+      "ADMIN_PASSWORD is invalid."
+    );
+    return;
+  }
+
+  const existing = db
+    .prepare(
+      `
+      SELECT id, role
+      FROM users
+      WHERE phone = ?
+      `
+    )
+    .get(phone);
+
+  if (!existing) {
+    const hash = await bcrypt.hash(
+      password,
+      12
+    );
+
+    db.prepare(
+      `
+      INSERT INTO users(
+        name,
+        phone,
+        password,
+        role
+      )
+      VALUES(?,?,?,'admin')
+      `
+    ).run(
+      name,
+      phone,
+      hash
+    );
+
+    console.log("Admin account created.");
+  } else if (existing.role !== "admin") {
+    db.prepare(
+      `
+      UPDATE users
+      SET role = 'admin'
+      WHERE id = ?
+      `
+    ).run(existing.id);
+
+    console.log("Existing account promoted to admin.");
+  }
+}
 
 /* =========================
-   START
+   STATIC FRONTEND
+========================= */
+
+app.use(express.static(path.join(__dirname, "public")));
+
+app.get("*", (req, res) => {
+  res.sendFile(
+    path.join(__dirname, "public", "index.html")
+  );
+});
+
+/* =========================
+   START SERVER
 ========================= */
 
 await setupAdmin();
 
-app.listen(
-  PORT,
-  "0.0.0.0",
-  () => {
-    console.log(
-      `Djalil Delivery running on port ${PORT}`
-    );
-  }
-);
+app.listen(PORT, () => {
+  console.log(
+    `Djalil Delivery running on port ${PORT}`
+  );
+});
