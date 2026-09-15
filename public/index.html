@@ -6,6 +6,11 @@
 
 <title>Djalil Delivery</title>
 
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
 <style>
 :root{
   --yellow:#ffd21c;
@@ -382,6 +387,41 @@ header{
   font-weight:bold;
 }
 
+/* MAP */
+
+#map{
+  width:100%;
+  height:300px;
+  border-radius:12px;
+  margin-top:10px;
+  overflow:hidden;
+}
+
+.location-actions{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
+
+.location-actions button{
+  flex:1;
+}
+
+.location-status{
+  margin-top:8px;
+  font-size:13px;
+  color:#666;
+}
+
+.location-status.success{
+  color:#08733e;
+  font-weight:bold;
+}
+
+.location-status.error{
+  color:#b00000;
+}
+
 footer{
   margin-top:50px;
   background:#111;
@@ -391,6 +431,7 @@ footer{
 }
 
 @media(max-width:600px){
+
   .hero h1{
     font-size:27px;
   }
@@ -414,6 +455,7 @@ footer{
   .product-emoji{
     font-size:42px;
   }
+
 }
 </style>
 </head>
@@ -421,6 +463,7 @@ footer{
 <body>
 
 <header>
+
   <div class="header-inner">
 
     <div class="logo">
@@ -437,6 +480,7 @@ footer{
       </button>
 
       <div id="userBox" class="user-box">
+
         <span id="userName" class="user-name"></span>
 
         <button
@@ -450,11 +494,13 @@ footer{
           onclick="logout()">
           خروج
         </button>
+
       </div>
 
     </div>
 
   </div>
+
 </header>
 
 
@@ -477,9 +523,7 @@ footer{
 
   </section>
 
-
   <div id="categories" class="categories"></div>
-
 
   <section>
 
@@ -513,17 +557,19 @@ footer{
 
 
 <footer>
+
   <strong>Djalil Delivery</strong>
+
   <br>
+
   خدمة توصيل الطعام
+
 </footer>
 
 
 <!-- AUTH MODAL -->
 
-<div
-  id="authModal"
-  class="modal">
+<div id="authModal" class="modal">
 
   <div class="modal-box">
 
@@ -559,8 +605,6 @@ footer{
     </div>
 
 
-    <!-- LOGIN -->
-
     <form
       id="loginForm"
       class="auth-form active"
@@ -580,7 +624,6 @@ footer{
 
       </div>
 
-
       <div class="form-group">
 
         <label>كلمة السر</label>
@@ -595,7 +638,6 @@ footer{
 
       </div>
 
-
       <button
         class="btn btn-yellow"
         style="width:100%"
@@ -605,8 +647,6 @@ footer{
 
     </form>
 
-
-    <!-- REGISTER -->
 
     <form
       id="registerForm"
@@ -627,7 +667,6 @@ footer{
 
       </div>
 
-
       <div class="form-group">
 
         <label>رقم الهاتف</label>
@@ -641,7 +680,6 @@ footer{
           required>
 
       </div>
-
 
       <div class="form-group">
 
@@ -657,7 +695,6 @@ footer{
           required>
 
       </div>
-
 
       <button
         class="btn btn-yellow"
@@ -675,9 +712,7 @@ footer{
 
 <!-- CART MODAL -->
 
-<div
-  id="cartModal"
-  class="modal">
+<div id="cartModal" class="modal">
 
   <div class="modal-box">
 
@@ -692,8 +727,13 @@ footer{
     <div id="cartItems"></div>
 
     <div class="cart-total">
+
       <span>المجموع</span>
-      <span id="cartTotal">0 دج</span>
+
+      <span id="cartTotal">
+        0 دج
+      </span>
+
     </div>
 
     <button
@@ -710,9 +750,7 @@ footer{
 
 <!-- CHECKOUT MODAL -->
 
-<div
-  id="checkoutModal"
-  class="modal">
+<div id="checkoutModal" class="modal">
 
   <div class="modal-box">
 
@@ -729,16 +767,52 @@ footer{
       class="message">
     </div>
 
-    <form
-      onsubmit="placeOrder(event)">
+
+    <form onsubmit="placeOrder(event)">
+
+
+      <!-- LOCATION -->
 
       <div class="form-group">
 
-        <label>العنوان</label>
+        <label>📍 موقع التوصيل</label>
+
+        <div id="map"></div>
+
+        <div class="location-actions">
+
+          <button
+            type="button"
+            class="btn btn-yellow"
+            onclick="getMyLocation()">
+            📍 تحديد موقعي
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-dark"
+            onclick="resetLocation()">
+            🔄 إعادة
+          </button>
+
+        </div>
+
+        <div
+          id="locationStatus"
+          class="location-status">
+          اضغط على «تحديد موقعي» لاختيار مكان التوصيل.
+        </div>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>العنوان بالتفصيل</label>
 
         <textarea
           id="address"
-          placeholder="اكتب عنوان التوصيل بالتفصيل"
+          placeholder="مثال: حي كذا، شارع كذا، رقم المنزل..."
           required></textarea>
 
       </div>
@@ -773,9 +847,7 @@ footer{
 
 <!-- ORDERS MODAL -->
 
-<div
-  id="ordersModal"
-  class="modal">
+<div id="ordersModal" class="modal">
 
   <div class="modal-box">
 
@@ -794,6 +866,8 @@ footer{
 </div>
 
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
 
 const API = "/api";
@@ -803,53 +877,61 @@ let cart = [];
 let selectedCategory = "الكل";
 let currentUser = null;
 
+let map = null;
+let locationMarker = null;
+let selectedLatitude = null;
+let selectedLongitude = null;
+
 
 /* =========================
    HELPERS
 ========================= */
 
-function escapeHTML(value) {
+function escapeHTML(value){
 
   return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
 
 }
 
 
-function money(value) {
+function money(value){
 
-  return Number(value || 0).toLocaleString("fr-DZ") + " دج";
+  return Number(value || 0)
+    .toLocaleString("fr-DZ") + " دج";
 
 }
 
 
-function openModal(id) {
+function openModal(id){
 
-  const modal = document.getElementById(id);
+  const modal =
+    document.getElementById(id);
 
-  if (modal) {
+  if(modal){
     modal.style.display = "flex";
   }
 
 }
 
 
-function closeModal(id) {
+function closeModal(id){
 
-  const modal = document.getElementById(id);
+  const modal =
+    document.getElementById(id);
 
-  if (modal) {
+  if(modal){
     modal.style.display = "none";
   }
 
 }
 
 
-function clearAuthFields() {
+function clearAuthFields(){
 
   const fields = [
     "loginPhone",
@@ -859,11 +941,12 @@ function clearAuthFields() {
     "registerPassword"
   ];
 
-  fields.forEach((id) => {
+  fields.forEach((id)=>{
 
-    const element = document.getElementById(id);
+    const element =
+      document.getElementById(id);
 
-    if (element) {
+    if(element){
       element.value = "";
     }
 
@@ -876,7 +959,7 @@ function clearAuthFields() {
    AUTH
 ========================= */
 
-function openAuth() {
+function openAuth(){
 
   showAuthForm("login");
 
@@ -887,7 +970,7 @@ function openAuth() {
 }
 
 
-function showAuthForm(type) {
+function showAuthForm(type){
 
   const loginForm =
     document.getElementById("loginForm");
@@ -902,7 +985,7 @@ function showAuthForm(type) {
     document.getElementById("registerTab");
 
 
-  if (type === "login") {
+  if(type === "login"){
 
     loginForm.classList.add("active");
     registerForm.classList.remove("active");
@@ -910,7 +993,7 @@ function showAuthForm(type) {
     loginTab.classList.add("active");
     registerTab.classList.remove("active");
 
-  } else {
+  }else{
 
     loginForm.classList.remove("active");
     registerForm.classList.add("active");
@@ -923,12 +1006,12 @@ function showAuthForm(type) {
 }
 
 
-function showMessage(id, text, type = "error") {
+function showMessage(id,text,type="error"){
 
   const element =
     document.getElementById(id);
 
-  if (!element) return;
+  if(!element) return;
 
   element.textContent = text;
 
@@ -938,12 +1021,12 @@ function showMessage(id, text, type = "error") {
 }
 
 
-function clearMessage(id) {
+function clearMessage(id){
 
   const element =
     document.getElementById(id);
 
-  if (!element) return;
+  if(!element) return;
 
   element.textContent = "";
 
@@ -952,42 +1035,44 @@ function clearMessage(id) {
 }
 
 
-async function login(event) {
+async function login(event){
 
   event.preventDefault();
 
   clearMessage("authMessage");
 
   const phone =
-    document.getElementById("loginPhone").value.trim();
+    document.getElementById("loginPhone")
+      .value.trim();
 
   const password =
-    document.getElementById("loginPassword").value;
+    document.getElementById("loginPassword")
+      .value;
 
 
-  try {
+  try{
 
-    const response = await fetch(
-      API + "/login",
-      {
-        method: "POST",
-
-        headers: {
-          "Content-Type": "application/json"
-        },
-
-        body: JSON.stringify({
-          phone,
-          password
-        })
-      }
-    );
-
-
-    const data = await response.json();
+    const response =
+      await fetch(
+        API + "/login",
+        {
+          method:"POST",
+          headers:{
+            "Content-Type":"application/json"
+          },
+          body:JSON.stringify({
+            phone,
+            password
+          })
+        }
+      );
 
 
-    if (!response.ok) {
+    const data =
+      await response.json();
+
+
+    if(!response.ok){
 
       showMessage(
         "authMessage",
@@ -1017,7 +1102,7 @@ async function login(event) {
 
     alert("مرحبا " + data.user.name);
 
-  } catch (error) {
+  }catch(error){
 
     showMessage(
       "authMessage",
@@ -1029,7 +1114,7 @@ async function login(event) {
 }
 
 
-async function register(event) {
+async function register(event){
 
   event.preventDefault();
 
@@ -1037,39 +1122,42 @@ async function register(event) {
 
 
   const name =
-    document.getElementById("registerName").value.trim();
+    document.getElementById("registerName")
+      .value.trim();
 
   const phone =
-    document.getElementById("registerPhone").value.trim();
+    document.getElementById("registerPhone")
+      .value.trim();
 
   const password =
-    document.getElementById("registerPassword").value;
+    document.getElementById("registerPassword")
+      .value;
 
 
-  try {
+  try{
 
-    const response = await fetch(
-      API + "/register",
-      {
-        method: "POST",
-
-        headers: {
-          "Content-Type": "application/json"
-        },
-
-        body: JSON.stringify({
-          name,
-          phone,
-          password
-        })
-      }
-    );
-
-
-    const data = await response.json();
+    const response =
+      await fetch(
+        API + "/register",
+        {
+          method:"POST",
+          headers:{
+            "Content-Type":"application/json"
+          },
+          body:JSON.stringify({
+            name,
+            phone,
+            password
+          })
+        }
+      );
 
 
-    if (!response.ok) {
+    const data =
+      await response.json();
+
+
+    if(!response.ok){
 
       showMessage(
         "authMessage",
@@ -1097,7 +1185,7 @@ async function register(event) {
 
     alert("تم إنشاء الحساب بنجاح 🎉");
 
-  } catch (error) {
+  }catch(error){
 
     showMessage(
       "authMessage",
@@ -1113,7 +1201,7 @@ async function register(event) {
    LOGOUT
 ========================= */
 
-function logout() {
+function logout(){
 
   localStorage.removeItem("token");
 
@@ -1132,11 +1220,6 @@ function logout() {
   closeModal("ordersModal");
   closeModal("authModal");
 
-  /*
-    إعادة تحميل الصفحة تمنع المتصفح
-    من الاحتفاظ بمعلومات النماذج.
-  */
-
   window.location.reload();
 
 }
@@ -1146,12 +1229,13 @@ function logout() {
    SESSION
 ========================= */
 
-async function checkSession() {
+async function checkSession(){
 
   const token =
     localStorage.getItem("token");
 
-  if (!token) {
+
+  if(!token){
 
     currentUser = null;
 
@@ -1162,19 +1246,21 @@ async function checkSession() {
   }
 
 
-  try {
+  try{
 
-    const response = await fetch(
-      API + "/me",
-      {
-        headers: {
-          Authorization: "Bearer " + token
+    const response =
+      await fetch(
+        API + "/me",
+        {
+          headers:{
+            Authorization:
+              "Bearer " + token
+          }
         }
-      }
-    );
+      );
 
 
-    if (!response.ok) {
+    if(!response.ok){
 
       localStorage.removeItem("token");
 
@@ -1194,7 +1280,7 @@ async function checkSession() {
 
     updateUserUI();
 
-  } catch {
+  }catch{
 
     localStorage.removeItem("token");
 
@@ -1207,7 +1293,7 @@ async function checkSession() {
 }
 
 
-function updateUserUI() {
+function updateUserUI(){
 
   const loginBtn =
     document.getElementById("loginBtn");
@@ -1219,7 +1305,7 @@ function updateUserUI() {
     document.getElementById("userName");
 
 
-  if (currentUser) {
+  if(currentUser){
 
     loginBtn.style.display = "none";
 
@@ -1228,7 +1314,7 @@ function updateUserUI() {
     userName.textContent =
       currentUser.name;
 
-  } else {
+  }else{
 
     loginBtn.style.display = "block";
 
@@ -1245,13 +1331,13 @@ function updateUserUI() {
    PRODUCTS
 ========================= */
 
-async function loadProducts() {
+async function loadProducts(){
 
   const container =
     document.getElementById("products");
 
 
-  try {
+  try{
 
     const response =
       await fetch(API + "/products");
@@ -1263,7 +1349,7 @@ async function loadProducts() {
 
     renderProducts();
 
-  } catch {
+  }catch{
 
     container.innerHTML =
       `<div class="empty">
@@ -1275,17 +1361,18 @@ async function loadProducts() {
 }
 
 
-function renderCategories() {
+function renderCategories(){
 
   const categories =
     ["الكل"];
 
-  products.forEach((product) => {
 
-    if (
+  products.forEach((product)=>{
+
+    if(
       product.category &&
       !categories.includes(product.category)
-    ) {
+    ){
 
       categories.push(product.category);
 
@@ -1299,7 +1386,7 @@ function renderCategories() {
 
 
   container.innerHTML =
-    categories.map((category) => `
+    categories.map((category)=>`
 
       <button
         class="category ${
@@ -1318,7 +1405,7 @@ function renderCategories() {
 }
 
 
-function selectCategory(category) {
+function selectCategory(category){
 
   selectedCategory = category;
 
@@ -1329,7 +1416,7 @@ function selectCategory(category) {
 }
 
 
-function renderProducts() {
+function renderProducts(){
 
   const container =
     document.getElementById("products");
@@ -1342,7 +1429,7 @@ function renderProducts() {
 
 
   const filtered =
-    products.filter((product) => {
+    products.filter((product)=>{
 
       const categoryMatch =
         selectedCategory === "الكل" ||
@@ -1350,7 +1437,9 @@ function renderProducts() {
 
       const searchMatch =
         !search ||
-        product.name.toLowerCase().includes(search) ||
+        product.name
+          .toLowerCase()
+          .includes(search) ||
         String(product.category || "")
           .toLowerCase()
           .includes(search);
@@ -1360,7 +1449,7 @@ function renderProducts() {
     });
 
 
-  if (!filtered.length) {
+  if(!filtered.length){
 
     container.innerHTML =
       `<div class="empty">
@@ -1373,7 +1462,7 @@ function renderProducts() {
 
 
   container.innerHTML =
-    filtered.map((product) => `
+    filtered.map((product)=>`
 
       <article class="product">
 
@@ -1412,37 +1501,37 @@ function renderProducts() {
    CART
 ========================= */
 
-function addToCart(productId) {
+function addToCart(productId){
 
   const product =
     products.find(
-      (item) => item.id === productId
+      (item)=>item.id === productId
     );
 
 
-  if (!product) return;
+  if(!product) return;
 
 
   const existing =
     cart.find(
-      (item) => item.id === productId
+      (item)=>item.id === productId
     );
 
 
-  if (existing) {
+  if(existing){
 
-    if (existing.quantity < 20) {
+    if(existing.quantity < 20){
       existing.quantity++;
     }
 
-  } else {
+  }else{
 
     cart.push({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      emoji: product.emoji,
-      quantity: 1
+      id:product.id,
+      name:product.name,
+      price:product.price,
+      emoji:product.emoji,
+      quantity:1
     });
 
   }
@@ -1453,32 +1542,32 @@ function addToCart(productId) {
 }
 
 
-function changeQuantity(productId, change) {
+function changeQuantity(productId,change){
 
   const item =
     cart.find(
-      (product) => product.id === productId
+      (product)=>product.id === productId
     );
 
 
-  if (!item) return;
+  if(!item) return;
 
 
   item.quantity += change;
 
 
-  if (item.quantity <= 0) {
+  if(item.quantity <= 0){
 
     cart =
       cart.filter(
-        (product) =>
+        (product)=>
           product.id !== productId
       );
 
   }
 
 
-  if (item.quantity > 20) {
+  if(item.quantity > 20){
     item.quantity = 20;
   }
 
@@ -1490,10 +1579,10 @@ function changeQuantity(productId, change) {
 }
 
 
-function cartTotal() {
+function cartTotal(){
 
   return cart.reduce(
-    (total, item) =>
+    (total,item)=>
       total + item.price * item.quantity,
     0
   );
@@ -1501,11 +1590,11 @@ function cartTotal() {
 }
 
 
-function updateCartUI() {
+function updateCartUI(){
 
   const count =
     cart.reduce(
-      (total, item) =>
+      (total,item)=>
         total + item.quantity,
       0
     );
@@ -1526,7 +1615,7 @@ function updateCartUI() {
 }
 
 
-function openCart() {
+function openCart(){
 
   renderCart();
 
@@ -1535,7 +1624,7 @@ function openCart() {
 }
 
 
-function renderCart() {
+function renderCart(){
 
   const container =
     document.getElementById("cartItems");
@@ -1544,7 +1633,7 @@ function renderCart() {
     document.getElementById("cartTotal");
 
 
-  if (!cart.length) {
+  if(!cart.length){
 
     container.innerHTML =
       `<div class="empty">
@@ -1559,7 +1648,7 @@ function renderCart() {
 
 
   container.innerHTML =
-    cart.map((item) => `
+    cart.map((item)=>`
 
       <div class="cart-item">
 
@@ -1609,12 +1698,285 @@ function renderCart() {
 
 
 /* =========================
+   LOCATION / MAP
+========================= */
+
+function initMap(){
+
+  if(map){
+
+    setTimeout(()=>{
+      map.invalidateSize();
+    },200);
+
+    return;
+
+  }
+
+
+  const defaultLat = 36.7538;
+  const defaultLng = 3.0588;
+
+
+  map =
+    L.map("map").setView(
+      [defaultLat,defaultLng],
+      12
+    );
+
+
+  L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+      maxZoom:19,
+      attribution:"© OpenStreetMap"
+    }
+  ).addTo(map);
+
+
+  setTimeout(()=>{
+    map.invalidateSize();
+  },300);
+
+}
+
+
+function getMyLocation(){
+
+  const status =
+    document.getElementById(
+      "locationStatus"
+    );
+
+
+  if(!navigator.geolocation){
+
+    status.textContent =
+      "المتصفح لا يدعم تحديد الموقع.";
+
+    status.className =
+      "location-status error";
+
+    return;
+
+  }
+
+
+  status.textContent =
+    "جاري تحديد موقعك... 📍";
+
+  status.className =
+    "location-status";
+
+
+  navigator.geolocation.getCurrentPosition(
+
+    function(position){
+
+      const latitude =
+        position.coords.latitude;
+
+      const longitude =
+        position.coords.longitude;
+
+
+      selectedLatitude =
+        latitude;
+
+      selectedLongitude =
+        longitude;
+
+
+      if(!map){
+        initMap();
+      }
+
+
+      map.setView(
+        [latitude,longitude],
+        17
+      );
+
+
+      if(locationMarker){
+
+        locationMarker.setLatLng([
+          latitude,
+          longitude
+        ]);
+
+      }else{
+
+        locationMarker =
+          L.marker(
+            [latitude,longitude],
+            {
+              draggable:true
+            }
+          ).addTo(map);
+
+
+        locationMarker
+          .bindPopup(
+            "📍 موقع التوصيل"
+          )
+          .openPopup();
+
+
+        locationMarker.on(
+          "dragend",
+          function(event){
+
+            const position =
+              event.target.getLatLng();
+
+
+            selectedLatitude =
+              position.lat;
+
+            selectedLongitude =
+              position.lng;
+
+
+            updateLocationStatus();
+
+          }
+        );
+
+      }
+
+
+      updateLocationStatus();
+
+    },
+
+
+    function(error){
+
+      let message =
+        "تعذر تحديد موقعك.";
+
+
+      if(error.code === 1){
+
+        message =
+          "لازم تسمح للموقع بالوصول إلى موقعك من إعدادات المتصفح.";
+
+      }
+
+
+      if(error.code === 2){
+
+        message =
+          "تعذر الحصول على الموقع حالياً.";
+
+      }
+
+
+      if(error.code === 3){
+
+        message =
+          "انتهت مهلة تحديد الموقع. حاول مرة أخرى.";
+
+      }
+
+
+      status.textContent =
+        message;
+
+      status.className =
+        "location-status error";
+
+    },
+
+
+    {
+      enableHighAccuracy:true,
+      timeout:15000,
+      maximumAge:0
+    }
+
+  );
+
+}
+
+
+function updateLocationStatus(){
+
+  const status =
+    document.getElementById(
+      "locationStatus"
+    );
+
+
+  if(
+    selectedLatitude === null ||
+    selectedLongitude === null
+  ){
+
+    return;
+
+  }
+
+
+  status.textContent =
+    "تم تحديد موقع التوصيل ✅";
+
+  status.className =
+    "location-status success";
+
+}
+
+
+function resetLocation(){
+
+  selectedLatitude = null;
+  selectedLongitude = null;
+
+
+  if(locationMarker && map){
+
+    map.removeLayer(
+      locationMarker
+    );
+
+    locationMarker = null;
+
+  }
+
+
+  if(map){
+
+    map.setView(
+      [36.7538,3.0588],
+      12
+    );
+
+  }
+
+
+  const status =
+    document.getElementById(
+      "locationStatus"
+    );
+
+
+  status.textContent =
+    "اضغط على «تحديد موقعي» لاختيار مكان التوصيل.";
+
+  status.className =
+    "location-status";
+
+}
+
+
+/* =========================
    CHECKOUT
 ========================= */
 
-async function checkout() {
+async function checkout(){
 
-  if (!cart.length) {
+  if(!cart.length){
 
     alert("السلة فارغة.");
 
@@ -1627,7 +1989,7 @@ async function checkout() {
     localStorage.getItem("token");
 
 
-  if (!token) {
+  if(!token){
 
     closeModal("cartModal");
 
@@ -1638,7 +2000,9 @@ async function checkout() {
   }
 
 
-  document.getElementById("orderPhone").value =
+  document.getElementById(
+    "orderPhone"
+  ).value =
     currentUser?.phone || "";
 
 
@@ -1646,10 +2010,15 @@ async function checkout() {
 
   openModal("checkoutModal");
 
+
+  setTimeout(()=>{
+    initMap();
+  },100);
+
 }
 
 
-async function placeOrder(event) {
+async function placeOrder(event){
 
   event.preventDefault();
 
@@ -1661,6 +2030,7 @@ async function placeOrder(event) {
       .value
       .trim();
 
+
   const phone =
     document.getElementById("orderPhone")
       .value
@@ -1671,7 +2041,7 @@ async function placeOrder(event) {
     localStorage.getItem("token");
 
 
-  if (!token) {
+  if(!token){
 
     closeModal("checkoutModal");
 
@@ -1682,32 +2052,62 @@ async function placeOrder(event) {
   }
 
 
+  if(
+    selectedLatitude === null ||
+    selectedLongitude === null
+  ){
+
+    showMessage(
+      "checkoutMessage",
+      "لازم تحدد موقع التوصيل على الخريطة."
+    );
+
+    return;
+
+  }
+
+
   const items =
-    cart.map((item) => ({
-      product_id: item.id,
-      quantity: item.quantity
+    cart.map((item)=>({
+
+      product_id:item.id,
+      quantity:item.quantity
+
     }));
 
 
-  try {
+  try{
 
     const response =
       await fetch(
         API + "/orders",
         {
-          method: "POST",
+          method:"POST",
 
-          headers: {
-            "Content-Type": "application/json",
+          headers:{
+            "Content-Type":
+              "application/json",
+
             Authorization:
               "Bearer " + token
           },
 
-          body: JSON.stringify({
+          body:JSON.stringify({
+
             items,
+
             address,
-            phone
+
+            phone,
+
+            latitude:
+              selectedLatitude,
+
+            longitude:
+              selectedLongitude
+
           })
+
         }
       );
 
@@ -1716,7 +2116,7 @@ async function placeOrder(event) {
       await response.json();
 
 
-    if (response.status === 401) {
+    if(response.status === 401){
 
       localStorage.removeItem("token");
 
@@ -1733,11 +2133,12 @@ async function placeOrder(event) {
     }
 
 
-    if (!response.ok) {
+    if(!response.ok){
 
       showMessage(
         "checkoutMessage",
-        data.error || "فشل إرسال الطلب."
+        data.error ||
+        "فشل إرسال الطلب."
       );
 
       return;
@@ -1749,10 +2150,22 @@ async function placeOrder(event) {
 
     updateCartUI();
 
-    document.getElementById("address").value = "";
-    document.getElementById("orderPhone").value = "";
+
+    document.getElementById(
+      "address"
+    ).value = "";
+
+
+    document.getElementById(
+      "orderPhone"
+    ).value = "";
+
+
+    resetLocation();
+
 
     closeModal("checkoutModal");
+
 
     alert(
       "تم إرسال طلبك بنجاح 🎉\nرقم الطلب: " +
@@ -1762,7 +2175,8 @@ async function placeOrder(event) {
 
     await loadOrders();
 
-  } catch {
+
+  }catch{
 
     showMessage(
       "checkoutMessage",
@@ -1778,21 +2192,22 @@ async function placeOrder(event) {
    ORDERS
 ========================= */
 
-async function loadOrders() {
+async function loadOrders(){
 
   const token =
     localStorage.getItem("token");
 
-  if (!token) return;
+
+  if(!token) return;
 
 
-  try {
+  try{
 
     const response =
       await fetch(
         API + "/orders",
         {
-          headers: {
+          headers:{
             Authorization:
               "Bearer " + token
           }
@@ -1800,7 +2215,7 @@ async function loadOrders() {
       );
 
 
-    if (!response.ok) return;
+    if(!response.ok) return;
 
 
     const data =
@@ -1809,7 +2224,7 @@ async function loadOrders() {
 
     window.myOrders = data;
 
-  } catch {
+  }catch{
 
     window.myOrders = [];
 
@@ -1818,21 +2233,21 @@ async function loadOrders() {
 }
 
 
-function statusText(status) {
+function statusText(status){
 
   const statuses = {
 
-    received: "تم استلام الطلب",
+    received:"تم استلام الطلب",
 
-    preparing: "قيد التحضير",
+    preparing:"قيد التحضير",
 
-    pickup: "جاهز للاستلام",
+    pickup:"جاهز للاستلام",
 
-    on_the_way: "في الطريق 🚗",
+    on_the_way:"في الطريق 🚗",
 
-    delivered: "تم التوصيل ✅",
+    delivered:"تم التوصيل ✅",
 
-    cancelled: "ملغى"
+    cancelled:"ملغى"
 
   };
 
@@ -1842,7 +2257,7 @@ function statusText(status) {
 }
 
 
-function openOrders() {
+function openOrders(){
 
   renderOrders();
 
@@ -1851,10 +2266,12 @@ function openOrders() {
 }
 
 
-async function renderOrders() {
+async function renderOrders(){
 
   const container =
-    document.getElementById("ordersList");
+    document.getElementById(
+      "ordersList"
+    );
 
 
   container.innerHTML =
@@ -1870,7 +2287,7 @@ async function renderOrders() {
     window.myOrders || [];
 
 
-  if (!orders.length) {
+  if(!orders.length){
 
     container.innerHTML =
       `<div class="empty">
@@ -1883,7 +2300,7 @@ async function renderOrders() {
 
 
   container.innerHTML =
-    orders.map((order) => {
+    orders.map((order)=>{
 
       const items =
         Array.isArray(order.items)
@@ -1915,7 +2332,7 @@ async function renderOrders() {
 
           <hr>
 
-          ${items.map((item) => `
+          ${items.map((item)=>`
 
             <div style="margin:5px 0">
 
@@ -1959,7 +2376,7 @@ async function renderOrders() {
 
 document.addEventListener(
   "DOMContentLoaded",
-  async () => {
+  async ()=>{
 
     await checkSession();
 
@@ -1973,15 +2390,19 @@ document.addEventListener(
 
 /* إغلاق النوافذ عند الضغط خارجها */
 
-document.querySelectorAll(".modal")
-  .forEach((modal) => {
+document
+  .querySelectorAll(".modal")
+  .forEach((modal)=>{
 
     modal.addEventListener(
       "click",
-      (event) => {
+      (event)=>{
 
-        if (event.target === modal) {
-          modal.style.display = "none";
+        if(event.target === modal){
+
+          modal.style.display =
+            "none";
+
         }
 
       }
