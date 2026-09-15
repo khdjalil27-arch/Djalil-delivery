@@ -126,6 +126,69 @@
       font-size: 28px;
     }
 
+    /* =========================
+       RESTAURANTS
+    ========================= */
+
+    .restaurants {
+      display: grid;
+      grid-template-columns: repeat(
+        auto-fit,
+        minmax(220px, 1fr)
+      );
+      gap: 15px;
+      margin-bottom: 35px;
+    }
+
+    .restaurant-card {
+      background: white;
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 5px 20px rgba(0,0,0,.07);
+      border: 2px solid transparent;
+      transition: .2s;
+    }
+
+    .restaurant-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .restaurant-card.active {
+      border-color: #ffd400;
+    }
+
+    .restaurant-icon {
+      font-size: 45px;
+      margin-bottom: 10px;
+    }
+
+    .restaurant-card h3 {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+
+    .restaurant-info {
+      color: #777;
+      font-size: 14px;
+      line-height: 1.7;
+      min-height: 48px;
+      margin-bottom: 15px;
+    }
+
+    .restaurant-btn {
+      width: 100%;
+      padding: 11px;
+      border-radius: 10px;
+      background: #111;
+      color: white;
+      font-weight: bold;
+    }
+
+    .restaurant-card.active .restaurant-btn {
+      background: #ffd400;
+      color: #111;
+    }
+
     .categories {
       display: flex;
       gap: 10px;
@@ -149,7 +212,10 @@
 
     .products {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(
+        auto-fit,
+        minmax(220px, 1fr)
+      );
       gap: 20px;
     }
 
@@ -462,6 +528,10 @@
       #map {
         height: 300px;
       }
+
+      .restaurants {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -506,7 +576,10 @@
   <!-- HERO -->
   <section class="hero">
     <h1>مرحبا بك في <span>Djalil Delivery</span></h1>
-    <p>اطلب أكلك المفضل وخليه يوصلك حتى لباب الدار 🍔</p>
+
+    <p>
+      اطلب أكلك المفضل وخليه يوصلك حتى لباب الدار 🍔
+    </p>
 
     <div class="search-box">
       <input
@@ -518,12 +591,26 @@
     </div>
   </section>
 
-  <!-- PRODUCTS -->
+  <!-- MAIN -->
   <main class="container">
 
-    <h2 class="section-title">اختار واش تحب 🍴</h2>
+    <!-- RESTAURANTS -->
+    <h2 class="section-title">
+      🍽️ اختار المطعم
+    </h2>
+
+    <div
+      id="restaurants"
+      class="restaurants"
+    ></div>
+
+    <!-- PRODUCTS -->
+    <h2 class="section-title">
+      اختار واش تحب 🍴
+    </h2>
 
     <div class="categories">
+
       <button
         class="category active"
         data-category="all"
@@ -571,6 +658,7 @@
       >
         🍗 دجاج
       </button>
+
     </div>
 
     <div
@@ -604,7 +692,9 @@
         ×
       </button>
 
-      <h2 class="modal-title">الحساب</h2>
+      <h2 class="modal-title">
+        الحساب
+      </h2>
 
       <div class="auth-tabs">
 
@@ -635,6 +725,7 @@
 
         <div class="form-group">
           <label>رقم الهاتف</label>
+
           <input
             id="loginPhone"
             type="tel"
@@ -646,6 +737,7 @@
 
         <div class="form-group">
           <label>كلمة السر</label>
+
           <input
             id="loginPassword"
             type="password"
@@ -673,6 +765,7 @@
 
         <div class="form-group">
           <label>الاسم</label>
+
           <input
             id="registerName"
             type="text"
@@ -683,6 +776,7 @@
 
         <div class="form-group">
           <label>رقم الهاتف</label>
+
           <input
             id="registerPhone"
             type="tel"
@@ -694,6 +788,7 @@
 
         <div class="form-group">
           <label>كلمة السر</label>
+
           <input
             id="registerPassword"
             type="password"
@@ -731,7 +826,9 @@
         ×
       </button>
 
-      <h2 class="modal-title">🛒 السلة</h2>
+      <h2 class="modal-title">
+        🛒 السلة
+      </h2>
 
       <div id="cartItems"></div>
 
@@ -742,7 +839,9 @@
 
         <div class="cart-total">
           <span>المجموع</span>
-          <span id="cartTotal">0 دج</span>
+          <span id="cartTotal">
+            0 دج
+          </span>
         </div>
 
         <button
@@ -778,7 +877,10 @@
       </h2>
 
       <div class="form-group">
-        <label>رقم الهاتف</label>
+
+        <label>
+          رقم الهاتف
+        </label>
 
         <input
           id="orderPhone"
@@ -786,15 +888,20 @@
           placeholder="05xxxxxxxx"
           autocomplete="tel"
         />
+
       </div>
 
       <div class="form-group">
-        <label>العنوان بالتفصيل</label>
+
+        <label>
+          العنوان بالتفصيل
+        </label>
 
         <textarea
           id="address"
           placeholder="مثال: الجزائر، باب الزوار، حي..."
         ></textarea>
+
       </div>
 
       <!-- LOCATION -->
@@ -804,8 +911,15 @@
           📍 موقع التوصيل
         </label>
 
-        <p style="font-size:13px;color:#777;margin-bottom:8px">
-          حدد مكان التوصيل على الخريطة، أو اضغط على "تحديد موقعي".
+        <p
+          style="
+            font-size:13px;
+            color:#777;
+            margin-bottom:8px;
+          "
+        >
+          حدد مكان التوصيل على الخريطة،
+          أو اضغط على "تحديد موقعي".
         </p>
 
         <div id="map"></div>
@@ -860,8 +974,15 @@
         class="cart-total"
         style="margin-bottom:15px"
       >
-        <span>المجموع النهائي</span>
-        <span id="checkoutTotal">0 دج</span>
+
+        <span>
+          المجموع النهائي
+        </span>
+
+        <span id="checkoutTotal">
+          0 دج
+        </span>
+
       </div>
 
       <button
@@ -907,157 +1028,264 @@
   ></div>
 
   <!-- LEAFLET -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  ></script>
 
   <script>
+
     /* =========================
        GLOBAL VARIABLES
     ========================= */
 
     let products = [];
+
+    let restaurants = [];
+
     let cart = [];
+
     let currentUser = null;
+
     let selectedCategory = "all";
 
+    let selectedRestaurantId = null;
+
     let map = null;
+
     let marker = null;
 
     let selectedLatitude = null;
+
     let selectedLongitude = null;
 
     const DELIVERY_FEE = 300;
+
 
     /* =========================
        API
     ========================= */
 
-    async function api(url, options = {}) {
+    async function api(
+      url,
+      options = {}
+    ) {
+
       const headers = {
         "Content-Type": "application/json",
         ...(options.headers || {})
       };
 
-      const token = localStorage.getItem("token");
+      const token =
+        localStorage.getItem("token");
 
       if (token) {
-        headers.Authorization = `Bearer ${token}`;
+        headers.Authorization =
+          `Bearer ${token}`;
       }
 
-      const response = await fetch(url, {
-        ...options,
-        headers
-      });
+      const response =
+        await fetch(
+          url,
+          {
+            ...options,
+            headers
+          }
+        );
 
       let data = {};
 
       try {
-        data = await response.json();
+        data =
+          await response.json();
       } catch {
         data = {};
       }
 
       if (!response.ok) {
         throw new Error(
-          data.error || "حدث خطأ."
+          data.error ||
+          "حدث خطأ."
         );
       }
 
       return data;
     }
 
+
     /* =========================
        TOAST
     ========================= */
 
     function showToast(message) {
-      const toast =
-        document.getElementById("toast");
 
-      toast.textContent = message;
-      toast.classList.add("show");
+      const toast =
+        document.getElementById(
+          "toast"
+        );
+
+      toast.textContent =
+        message;
+
+      toast.classList.add(
+        "show"
+      );
 
       setTimeout(() => {
-        toast.classList.remove("show");
+
+        toast.classList.remove(
+          "show"
+        );
+
       }, 3000);
     }
+
 
     /* =========================
        HTML ESCAPE
     ========================= */
 
     function escapeHTML(value) {
+
       return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+        .replaceAll(
+          "&",
+          "&amp;"
+        )
+        .replaceAll(
+          "<",
+          "&lt;"
+        )
+        .replaceAll(
+          ">",
+          "&gt;"
+        )
+        .replaceAll(
+          '"',
+          "&quot;"
+        )
+        .replaceAll(
+          "'",
+          "&#039;"
+        );
     }
+
 
     /* =========================
        MODALS
     ========================= */
 
     function openModal(id) {
+
       document
         .getElementById(id)
-        .classList.add("active");
+        .classList.add(
+          "active"
+        );
     }
 
     function closeModal(id) {
+
       document
         .getElementById(id)
-        .classList.remove("active");
+        .classList.remove(
+          "active"
+        );
     }
 
     function modalBackgroundClose(
       event,
       id
     ) {
-      if (event.target.id === id) {
+
+      if (
+        event.target.id === id
+      ) {
         closeModal(id);
       }
     }
+
 
     /* =========================
        AUTH UI
     ========================= */
 
     function openAuthModal() {
+
       clearAuthFields();
-      showAuthForm("login");
-      openModal("authModal");
+
+      showAuthForm(
+        "login"
+      );
+
+      openModal(
+        "authModal"
+      );
     }
 
     function showAuthForm(type) {
+
       const loginForm =
-        document.getElementById("loginForm");
+        document.getElementById(
+          "loginForm"
+        );
 
       const registerForm =
-        document.getElementById("registerForm");
+        document.getElementById(
+          "registerForm"
+        );
 
       const loginTab =
-        document.getElementById("loginTab");
+        document.getElementById(
+          "loginTab"
+        );
 
       const registerTab =
-        document.getElementById("registerTab");
+        document.getElementById(
+          "registerTab"
+        );
 
-      if (type === "login") {
-        loginForm.classList.add("active");
-        registerForm.classList.remove("active");
+      if (
+        type === "login"
+      ) {
 
-        loginTab.classList.add("active");
-        registerTab.classList.remove("active");
+        loginForm.classList.add(
+          "active"
+        );
+
+        registerForm.classList.remove(
+          "active"
+        );
+
+        loginTab.classList.add(
+          "active"
+        );
+
+        registerTab.classList.remove(
+          "active"
+        );
+
       } else {
-        loginForm.classList.remove("active");
-        registerForm.classList.add("active");
 
-        loginTab.classList.remove("active");
-        registerTab.classList.add("active");
+        loginForm.classList.remove(
+          "active"
+        );
+
+        registerForm.classList.add(
+          "active"
+        );
+
+        loginTab.classList.remove(
+          "active"
+        );
+
+        registerTab.classList.add(
+          "active"
+        );
       }
     }
 
     function clearAuthFields() {
+
       document.getElementById(
         "loginPhone"
       ).value = "";
@@ -1079,11 +1307,13 @@
       ).value = "";
     }
 
+
     /* =========================
        REGISTER
     ========================= */
 
     async function register(event) {
+
       event.preventDefault();
 
       const name =
@@ -1102,42 +1332,57 @@
         ).value;
 
       try {
-        const data = await api(
-          "/api/register",
-          {
-            method: "POST",
-            body: JSON.stringify({
-              name,
-              phone,
-              password
-            })
-          }
-        );
+
+        const data =
+          await api(
+            "/api/register",
+            {
+              method: "POST",
+
+              body:
+                JSON.stringify({
+                  name,
+                  phone,
+                  password
+                })
+            }
+          );
 
         localStorage.setItem(
           "token",
           data.token
         );
 
-        currentUser = data.user;
+        currentUser =
+          data.user;
 
         clearAuthFields();
-        closeModal("authModal");
+
+        closeModal(
+          "authModal"
+        );
+
         updateUserUI();
 
         showToast(
           "تم إنشاء الحساب بنجاح ✅"
         );
+
       } catch (error) {
-        showToast(error.message);
+
+        showToast(
+          error.message
+        );
       }
     }
+
 
     /* =========================
        LOGIN
     ========================= */
 
     async function login(event) {
+
       event.preventDefault();
 
       const phone =
@@ -1151,26 +1396,35 @@
         ).value;
 
       try {
-        const data = await api(
-          "/api/login",
-          {
-            method: "POST",
-            body: JSON.stringify({
-              phone,
-              password
-            })
-          }
-        );
+
+        const data =
+          await api(
+            "/api/login",
+            {
+              method: "POST",
+
+              body:
+                JSON.stringify({
+                  phone,
+                  password
+                })
+            }
+          );
 
         localStorage.setItem(
           "token",
           data.token
         );
 
-        currentUser = data.user;
+        currentUser =
+          data.user;
 
         clearAuthFields();
-        closeModal("authModal");
+
+        closeModal(
+          "authModal"
+        );
+
         updateUserUI();
 
         showToast(
@@ -1178,39 +1432,69 @@
           currentUser.name +
           " 👋"
         );
+
       } catch (error) {
-        showToast(error.message);
+
+        showToast(
+          error.message
+        );
       }
     }
+
 
     /* =========================
        SESSION
     ========================= */
 
     async function checkSession() {
+
       const token =
-        localStorage.getItem("token");
+        localStorage.getItem(
+          "token"
+        );
 
       if (!token) {
-        currentUser = null;
+
+        currentUser =
+          null;
+
         updateUserUI();
+
         return;
       }
 
       try {
-        const data =
-          await api("/api/me");
 
-        currentUser = data.user;
+        const data =
+          await api(
+            "/api/me"
+          );
+
+        currentUser =
+          data.user;
+
         updateUserUI();
+
       } catch {
-        localStorage.removeItem("token");
-        currentUser = null;
+
+        localStorage.removeItem(
+          "token"
+        );
+
+        currentUser =
+          null;
+
         updateUserUI();
       }
     }
 
+
+    /* =========================
+       USER UI
+    ========================= */
+
     function updateUserUI() {
+
       const authButton =
         document.getElementById(
           "authButton"
@@ -1232,6 +1516,7 @@
         );
 
       if (currentUser) {
+
         authButton.style.display =
           "none";
 
@@ -1243,9 +1528,13 @@
 
         userDisplay.innerHTML =
           `<span class="user-name">
-            ${escapeHTML(currentUser.name)}
+            ${escapeHTML(
+              currentUser.name
+            )}
           </span>`;
+
       } else {
+
         authButton.style.display =
           "block";
 
@@ -1255,84 +1544,464 @@
         ordersButton.style.display =
           "none";
 
-        userDisplay.innerHTML = "";
+        userDisplay.innerHTML =
+          "";
       }
     }
+
 
     /* =========================
        LOGOUT
     ========================= */
 
     function logout() {
-      localStorage.removeItem("token");
 
-      currentUser = null;
+      localStorage.removeItem(
+        "token"
+      );
+
+      currentUser =
+        null;
+
       cart = [];
 
-      selectedLatitude = null;
-      selectedLongitude = null;
+      selectedLatitude =
+        null;
+
+      selectedLongitude =
+        null;
+
+      selectedRestaurantId =
+        null;
 
       updateCartUI();
+
       clearAuthFields();
+
       updateUserUI();
 
-      closeModal("cartModal");
-      closeModal("checkoutModal");
-      closeModal("ordersModal");
-      closeModal("authModal");
+      closeModal(
+        "cartModal"
+      );
+
+      closeModal(
+        "checkoutModal"
+      );
+
+      closeModal(
+        "ordersModal"
+      );
+
+      closeModal(
+        "authModal"
+      );
 
       showToast(
         "تم تسجيل الخروج بنجاح."
       );
 
       setTimeout(() => {
+
         window.location.reload();
+
       }, 500);
     }
 
+
     /* =========================
-       PRODUCTS
+       RESTAURANTS
+    ========================= */
+
+    async function loadRestaurants() {
+
+      const container =
+        document.getElementById(
+          "restaurants"
+        );
+
+      try {
+
+        const data =
+          await api(
+            "/api/restaurants"
+          );
+
+        /*
+          Backend الحالي يرجع:
+          { restaurants: [...] }
+
+          لكن نخلي الكود يقبل
+          أيضا array مباشرة.
+        */
+        restaurants =
+          Array.isArray(data)
+            ? data
+            : (
+              data.restaurants ||
+              []
+            );
+
+        if (
+          !restaurants.length
+        ) {
+
+          selectedRestaurantId =
+            null;
+
+          container.innerHTML =
+            `<div class="empty">
+              لا توجد مطاعم متاحة حاليا.
+            </div>`;
+
+          return;
+        }
+
+        /*
+          نختار أول مطعم
+          تلقائيا عند فتح الموقع.
+        */
+        if (
+          selectedRestaurantId ===
+          null
+        ) {
+
+          selectedRestaurantId =
+            Number(
+              restaurants[0].id
+            );
+        }
+
+        /*
+          إذا المطعم المختار
+          ما بقاش موجود
+        */
+        const exists =
+          restaurants.some(
+            restaurant =>
+              Number(
+                restaurant.id
+              ) ===
+              Number(
+                selectedRestaurantId
+              )
+          );
+
+        if (!exists) {
+
+          selectedRestaurantId =
+            Number(
+              restaurants[0].id
+            );
+        }
+
+        renderRestaurants();
+
+      } catch (error) {
+
+        container.innerHTML =
+          `<div class="empty">
+            ${escapeHTML(
+              error.message
+            )}
+          </div>`;
+      }
+    }
+
+
+    function renderRestaurants() {
+
+      const container =
+        document.getElementById(
+          "restaurants"
+        );
+
+      if (
+        !restaurants.length
+      ) {
+
+        container.innerHTML =
+          `<div class="empty">
+            لا توجد مطاعم.
+          </div>`;
+
+        return;
+      }
+
+      /*
+        زر عرض جميع المطاعم
+      */
+      const allActive =
+        selectedRestaurantId ===
+        null;
+
+      let html = `
+        <div
+          class="restaurant-card
+          ${allActive ? "active" : ""}"
+        >
+
+          <div class="restaurant-icon">
+            🍽️
+          </div>
+
+          <h3>
+            جميع المطاعم
+          </h3>
+
+          <div class="restaurant-info">
+            عرض جميع الوجبات المتوفرة
+            في Djalil Delivery.
+          </div>
+
+          <button
+            class="restaurant-btn"
+            onclick="selectRestaurant(null)"
+          >
+            ${
+              allActive
+                ? "✓ مختار"
+                : "عرض الكل"
+            }
+          </button>
+
+        </div>
+      `;
+
+      /*
+        المطاعم القادمة
+        من قاعدة البيانات
+      */
+      html += restaurants
+        .map(
+          restaurant => {
+
+            const active =
+              Number(
+                selectedRestaurantId
+              ) ===
+              Number(
+                restaurant.id
+              );
+
+            return `
+              <div
+                class="restaurant-card
+                ${
+                  active
+                    ? "active"
+                    : ""
+                }"
+              >
+
+                <div class="restaurant-icon">
+                  🍴
+                </div>
+
+                <h3>
+                  ${escapeHTML(
+                    restaurant.name
+                  )}
+                </h3>
+
+                <div class="restaurant-info">
+                  📍 ${
+                    escapeHTML(
+                      restaurant.address ||
+                      "العنوان غير محدد"
+                    )
+                  }
+                  <br>
+                  📞 ${
+                    escapeHTML(
+                      restaurant.phone ||
+                      ""
+                    )
+                  }
+                </div>
+
+                <button
+                  class="restaurant-btn"
+                  onclick="selectRestaurant(${Number(
+                    restaurant.id
+                  )})"
+                >
+                  ${
+                    active
+                      ? "✓ مختار"
+                      : "اختيار المطعم"
+                  }
+                </button>
+
+              </div>
+            `;
+          }
+        )
+        .join("");
+
+      container.innerHTML =
+        html;
+    }
+
+
+    /* =========================
+       SELECT RESTAURANT
+    ========================= */
+
+    function selectRestaurant(
+      restaurantId
+    ) {
+
+      const newRestaurantId =
+        restaurantId === null
+          ? null
+          : Number(
+              restaurantId
+            );
+
+      /*
+        إذا السلة فيها منتجات
+        من مطعم آخر، ما نسمحوش
+        بتغيير المطعم.
+      */
+      if (
+        cart.length &&
+        newRestaurantId !== null
+      ) {
+
+        const cartRestaurantIds =
+          [
+            ...new Set(
+              cart.map(
+                item =>
+                  Number(
+                    item.restaurantId
+                  )
+              )
+            )
+          ];
+
+        if (
+          cartRestaurantIds.length === 1 &&
+          cartRestaurantIds[0] !==
+            newRestaurantId
+        ) {
+
+          showToast(
+            "السلة فيها منتجات من مطعم آخر. فرّغ السلة أولا."
+          );
+
+          return;
+        }
+      }
+
+      /*
+        إذا اختار جميع المطاعم
+        والسلة فيها منتجات،
+        نخليه يشوف الكل فقط.
+      */
+      selectedRestaurantId =
+        newRestaurantId;
+
+      renderRestaurants();
+
+      renderProducts();
+
+      /*
+        ننزل لقسم المنتجات
+      */
+      setTimeout(() => {
+
+        const productsSection =
+          document.getElementById(
+            "products"
+          );
+
+        if (
+          productsSection
+        ) {
+
+          productsSection.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
+        }
+
+      }, 100);
+    }
+
+
+    /* =========================
+       LOAD PRODUCTS
     ========================= */
 
     async function loadProducts() {
+
       try {
+
         const data =
-          await api("/api/products");
+          await api(
+            "/api/products"
+          );
 
         products =
           data.products || [];
 
         renderProducts();
+
       } catch (error) {
+
         document.getElementById(
           "products"
         ).innerHTML =
           `<div class="empty">
-            ${escapeHTML(error.message)}
+            ${escapeHTML(
+              error.message
+            )}
           </div>`;
       }
     }
+
+
+    /* =========================
+       CATEGORY
+    ========================= */
 
     function setCategory(
       category,
       button
     ) {
-      selectedCategory = category;
+
+      selectedCategory =
+        category;
 
       document
-        .querySelectorAll(".category")
-        .forEach((item) => {
-          item.classList.remove(
-            "active"
-          );
-        });
+        .querySelectorAll(
+          ".category"
+        )
+        .forEach(
+          item => {
 
-      button.classList.add("active");
+            item.classList.remove(
+              "active"
+            );
+
+          }
+        );
+
+      button.classList.add(
+        "active"
+      );
 
       renderProducts();
     }
 
+
+    /* =========================
+       RENDER PRODUCTS
+    ========================= */
+
     function renderProducts() {
+
       const container =
         document.getElementById(
           "products"
@@ -1341,18 +2010,40 @@
       const search =
         document.getElementById(
           "searchInput"
-        ).value
+        )
+          .value
           .trim()
           .toLowerCase();
 
-      let filtered =
+      const filtered =
         products.filter(
-          (product) => {
+          product => {
+
+            /*
+              فلترة المطعم
+            */
+            const matchesRestaurant =
+              selectedRestaurantId ===
+              null ||
+              Number(
+                product.restaurant_id
+              ) ===
+              Number(
+                selectedRestaurantId
+              );
+
+            /*
+              فلترة التصنيف
+            */
             const matchesCategory =
-              selectedCategory === "all" ||
+              selectedCategory ===
+                "all" ||
               product.category ===
                 selectedCategory;
 
+            /*
+              البحث
+            */
             const matchesSearch =
               !search ||
               product.name
@@ -1360,16 +2051,20 @@
                 .includes(search);
 
             return (
+              matchesRestaurant &&
               matchesCategory &&
               matchesSearch
             );
           }
         );
 
-      if (!filtered.length) {
+      if (
+        !filtered.length
+      ) {
+
         container.innerHTML =
           `<div class="empty">
-            ما لقيناش نتائج.
+            ما لقيناش منتجات بهذا الاختيار.
           </div>`;
 
         return;
@@ -1378,93 +2073,184 @@
       container.innerHTML =
         filtered
           .map(
-            (product) => `
-              <div class="product">
+            product => {
 
-                <div class="product-image">
-                  ${escapeHTML(
-                    product.emoji || "🍔"
-                  )}
+              /*
+                نجيب اسم المطعم
+              */
+              const restaurant =
+                restaurants.find(
+                  r =>
+                    Number(r.id) ===
+                    Number(
+                      product.restaurant_id
+                    )
+                );
+
+              return `
+                <div class="product">
+
+                  <div class="product-image">
+                    ${escapeHTML(
+                      product.emoji ||
+                      "🍔"
+                    )}
+                  </div>
+
+                  <h3>
+                    ${escapeHTML(
+                      product.name
+                    )}
+                  </h3>
+
+                  <div class="product-category">
+
+                    ${escapeHTML(
+                      product.category
+                    )}
+
+                    ${
+                      restaurant
+                        ? `
+                          ·
+                          ${escapeHTML(
+                            restaurant.name
+                          )}
+                        `
+                        : ""
+                    }
+
+                  </div>
+
+                  <div class="product-bottom">
+
+                    <span class="price">
+                      ${Number(
+                        product.price
+                      ).toLocaleString(
+                        "fr-DZ"
+                      )}
+                      دج
+                    </span>
+
+                    <button
+                      class="add-btn"
+                      onclick="addToCart(${product.id})"
+                    >
+                      إضافة +
+                    </button>
+
+                  </div>
+
                 </div>
-
-                <h3>
-                  ${escapeHTML(
-                    product.name
-                  )}
-                </h3>
-
-                <div class="product-category">
-                  ${escapeHTML(
-                    product.category
-                  )}
-                </div>
-
-                <div class="product-bottom">
-
-                  <span class="price">
-                    ${Number(
-                      product.price
-                    ).toLocaleString(
-                      "fr-DZ"
-                    )} دج
-                  </span>
-
-                  <button
-                    class="add-btn"
-                    onclick="addToCart(${product.id})"
-                  >
-                    إضافة +
-                  </button>
-
-                </div>
-
-              </div>
-            `
+              `;
+            }
           )
           .join("");
     }
 
+
     /* =========================
-       CART
+       ADD TO CART
     ========================= */
 
-    function addToCart(productId) {
+    function addToCart(
+      productId
+    ) {
+
       const product =
         products.find(
-          (item) =>
+          item =>
             Number(item.id) ===
             Number(productId)
         );
 
-      if (!product) return;
+      if (!product) {
+        return;
+      }
+
+      const productRestaurantId =
+        Number(
+          product.restaurant_id
+        );
+
+      /*
+        منع خلط مطاعم مختلفة
+      */
+      if (
+        cart.length
+      ) {
+
+        const cartRestaurantIds =
+          [
+            ...new Set(
+              cart.map(
+                item =>
+                  Number(
+                    item.restaurantId
+                  )
+              )
+            )
+          ];
+
+        if (
+          cartRestaurantIds.length &&
+          cartRestaurantIds[0] !==
+            productRestaurantId
+        ) {
+
+          showToast(
+            "ما تقدرش تخلط منتجات من مطاعم مختلفة."
+          );
+
+          return;
+        }
+      }
 
       const existing =
         cart.find(
-          (item) =>
-            Number(item.productId) ===
+          item =>
+            Number(
+              item.productId
+            ) ===
             Number(productId)
         );
 
       if (existing) {
-        if (existing.quantity >= 20) {
+
+        if (
+          existing.quantity >=
+          20
+        ) {
+
           showToast(
             "الحد الأقصى 20 من نفس المنتج."
           );
+
           return;
         }
 
         existing.quantity++;
+
       } else {
+
         cart.push({
+
           productId:
             product.id,
+
           name:
             product.name,
+
           price:
             product.price,
+
           restaurantId:
             product.restaurant_id,
-          quantity: 1
+
+          quantity:
+            1
+
         });
       }
 
@@ -1475,64 +2261,106 @@
       );
     }
 
+
+    /* =========================
+       CHANGE QUANTITY
+    ========================= */
+
     function changeQuantity(
       productId,
       change
     ) {
+
       const item =
         cart.find(
-          (cartItem) =>
+          cartItem =>
             Number(
               cartItem.productId
-            ) === Number(productId)
+            ) ===
+            Number(productId)
         );
 
-      if (!item) return;
-
-      item.quantity += change;
-
-      if (item.quantity <= 0) {
-        cart = cart.filter(
-          (cartItem) =>
-            Number(
-              cartItem.productId
-            ) !== Number(productId)
-        );
+      if (!item) {
+        return;
       }
 
-      if (item.quantity > 20) {
+      item.quantity +=
+        change;
+
+      if (
+        item.quantity <= 0
+      ) {
+
+        cart =
+          cart.filter(
+            cartItem =>
+              Number(
+                cartItem.productId
+              ) !==
+              Number(productId)
+          );
+      }
+
+      if (
+        item.quantity > 20
+      ) {
+
         item.quantity = 20;
       }
 
       updateCartUI();
     }
 
+
+    /* =========================
+       CART TOTAL
+    ========================= */
+
     function getCartSubtotal() {
+
       return cart.reduce(
         (sum, item) =>
           sum +
-          Number(item.price) *
-            Number(item.quantity),
+          Number(
+            item.price
+          ) *
+          Number(
+            item.quantity
+          ),
         0
       );
     }
 
+
+    /* =========================
+       CART UI
+    ========================= */
+
     function updateCartUI() {
+
       const count =
         cart.reduce(
           (sum, item) =>
-            sum + item.quantity,
+            sum +
+            item.quantity,
           0
         );
 
       document.getElementById(
         "cartCount"
-      ).textContent = count;
+      ).textContent =
+        count;
 
       renderCart();
     }
 
+
+    /* =========================
+       RENDER CART
+    ========================= */
+
     function renderCart() {
+
       const container =
         document.getElementById(
           "cartItems"
@@ -1543,7 +2371,10 @@
           "cartSummary"
         );
 
-      if (!cart.length) {
+      if (
+        !cart.length
+      ) {
+
         container.innerHTML =
           `<div class="empty">
             السلة فارغة 🛒
@@ -1558,10 +2389,51 @@
       summary.style.display =
         "block";
 
+      /*
+        اسم المطعم في السلة
+      */
+      const restaurantId =
+        Number(
+          cart[0].restaurantId
+        );
+
+      const restaurant =
+        restaurants.find(
+          r =>
+            Number(r.id) ===
+            restaurantId
+        );
+
+      let restaurantHeader =
+        "";
+
+      if (restaurant) {
+
+        restaurantHeader =
+          `
+          <div
+            style="
+              background:#fff8d6;
+              padding:10px;
+              border-radius:10px;
+              margin-bottom:10px;
+            "
+          >
+            🍽️ المطعم:
+            <strong>
+              ${escapeHTML(
+                restaurant.name
+              )}
+            </strong>
+          </div>
+          `;
+      }
+
       container.innerHTML =
+        restaurantHeader +
         cart
           .map(
-            (item) => `
+            item => `
               <div class="cart-item">
 
                 <div class="cart-item-info">
@@ -1577,7 +2449,8 @@
                       item.price
                     ).toLocaleString(
                       "fr-DZ"
-                    )} دج
+                    )}
+                    دج
                   </div>
 
                 </div>
@@ -1585,7 +2458,10 @@
                 <div class="quantity">
 
                   <button
-                    onclick="changeQuantity(${item.productId}, -1)"
+                    onclick="changeQuantity(
+                      ${item.productId},
+                      -1
+                    )"
                   >
                     −
                   </button>
@@ -1595,7 +2471,10 @@
                   </strong>
 
                   <button
-                    onclick="changeQuantity(${item.productId}, 1)"
+                    onclick="changeQuantity(
+                      ${item.productId},
+                      1
+                    )"
                   >
                     +
                   </button>
@@ -1610,32 +2489,45 @@
       document.getElementById(
         "cartTotal"
       ).textContent =
-        (
-          getCartSubtotal()
-        ).toLocaleString(
-          "fr-DZ"
-        ) + " دج";
+        getCartSubtotal()
+          .toLocaleString(
+            "fr-DZ"
+          ) +
+        " دج";
     }
 
+
     function openCartModal() {
+
       renderCart();
-      openModal("cartModal");
+
+      openModal(
+        "cartModal"
+      );
     }
+
 
     /* =========================
        CHECKOUT
     ========================= */
 
     function startCheckout() {
+
       if (!cart.length) {
+
         showToast(
           "السلة فارغة."
         );
+
         return;
       }
 
       if (!currentUser) {
-        closeModal("cartModal");
+
+        closeModal(
+          "cartModal"
+        );
+
         openAuthModal();
 
         showToast(
@@ -1646,13 +2538,14 @@
       }
 
       /*
-        منع خلط مطاعم مختلفة
+        التأكد أن السلة
+        من مطعم واحد
       */
       const restaurantIds =
         [
           ...new Set(
             cart.map(
-              (item) =>
+              item =>
                 Number(
                   item.restaurantId
                 )
@@ -1660,24 +2553,34 @@
           )
         ];
 
-      if (restaurantIds.length !== 1) {
+      if (
+        restaurantIds.length !==
+        1
+      ) {
+
         showToast(
           "الطلب يجب أن يكون من مطعم واحد."
         );
+
         return;
       }
 
       document.getElementById(
         "orderPhone"
       ).value =
-        currentUser.phone || "";
+        currentUser.phone ||
+        "";
 
       document.getElementById(
         "address"
-      ).value = "";
+      ).value =
+        "";
 
-      selectedLatitude = null;
-      selectedLongitude = null;
+      selectedLatitude =
+        null;
+
+      selectedLongitude =
+        null;
 
       document.getElementById(
         "locationStatus"
@@ -1686,7 +2589,8 @@
 
       document.getElementById(
         "coordinates"
-      ).textContent = "";
+      ).textContent =
+        "";
 
       const total =
         getCartSubtotal() +
@@ -1697,62 +2601,75 @@
       ).textContent =
         total.toLocaleString(
           "fr-DZ"
-        ) + " دج";
+        ) +
+        " دج";
 
-      closeModal("cartModal");
+      closeModal(
+        "cartModal"
+      );
 
       openModal(
         "checkoutModal"
       );
 
       setTimeout(() => {
+
         initializeMap();
+
       }, 150);
     }
+
 
     /* =========================
        MAP
     ========================= */
 
     function initializeMap() {
+
       if (map) {
+
         map.invalidateSize();
+
         return;
       }
 
-      /*
-        موقع افتراضي عام في الجزائر
-        وليس موقع المستخدم الحقيقي.
-      */
-      const defaultLat = 36.7525;
-      const defaultLng = 3.0420;
+      const defaultLat =
+        36.7525;
 
-      map = L.map("map").setView(
-        [
-          defaultLat,
-          defaultLng
-        ],
-        12
-      );
+      const defaultLng =
+        3.0420;
+
+      map =
+        L.map(
+          "map"
+        ).setView(
+          [
+            defaultLat,
+            defaultLng
+          ],
+          12
+        );
 
       L.tileLayer(
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
         {
           maxZoom: 19,
+
           attribution:
             '&copy; OpenStreetMap contributors'
         }
       ).addTo(map);
 
-      marker = L.marker(
-        [
-          defaultLat,
-          defaultLng
-        ],
-        {
-          draggable: true
-        }
-      ).addTo(map);
+      marker =
+        L.marker(
+          [
+            defaultLat,
+            defaultLng
+          ],
+          {
+            draggable: true
+          }
+        ).addTo(map);
 
       marker.bindPopup(
         "حرّك العلامة إلى مكان التوصيل 📍"
@@ -1761,6 +2678,7 @@
       marker.on(
         "dragend",
         function () {
+
           const position =
             marker.getLatLng();
 
@@ -1774,6 +2692,7 @@
       map.on(
         "click",
         function (event) {
+
           setSelectedLocation(
             event.latlng.lat,
             event.latlng.lng
@@ -1782,10 +2701,12 @@
       );
     }
 
+
     function setSelectedLocation(
       lat,
       lng
     ) {
+
       selectedLatitude =
         Number(lat);
 
@@ -1793,17 +2714,23 @@
         Number(lng);
 
       if (marker) {
-        marker.setLatLng([
-          selectedLatitude,
-          selectedLongitude
-        ]);
+
+        marker.setLatLng(
+          [
+            selectedLatitude,
+            selectedLongitude
+          ]
+        );
       }
 
       if (map) {
-        map.panTo([
-          selectedLatitude,
-          selectedLongitude
-        ]);
+
+        map.panTo(
+          [
+            selectedLatitude,
+            selectedLongitude
+          ]
+        );
       }
 
       document.getElementById(
@@ -1814,18 +2741,24 @@
       document.getElementById(
         "coordinates"
       ).textContent =
-        `Latitude: ${selectedLatitude.toFixed(
-          6
-        )} | Longitude: ${selectedLongitude.toFixed(
-          6
-        )}`;
+        `Latitude: ${
+          selectedLatitude.toFixed(6)
+        } | Longitude: ${
+          selectedLongitude.toFixed(6)
+        }`;
     }
 
+
     function locateUser() {
-      if (!navigator.geolocation) {
+
+      if (
+        !navigator.geolocation
+      ) {
+
         showToast(
           "المتصفح لا يدعم تحديد الموقع."
         );
+
         return;
       }
 
@@ -1834,7 +2767,9 @@
       );
 
       navigator.geolocation.getCurrentPosition(
+
         function (position) {
+
           const lat =
             position.coords.latitude;
 
@@ -1847,8 +2782,12 @@
           );
 
           if (map) {
+
             map.setView(
-              [lat, lng],
+              [
+                lat,
+                lng
+              ],
               17
             );
           }
@@ -1857,7 +2796,9 @@
             "تم تحديد موقعك 📍"
           );
         },
+
         function (error) {
+
           let message =
             "تعذر تحديد موقعك.";
 
@@ -1865,23 +2806,37 @@
             error.code ===
             error.PERMISSION_DENIED
           ) {
+
             message =
               "سمح للموقع من إعدادات المتصفح باش نقدر نحدد مكانك.";
           }
 
-          showToast(message);
+          showToast(
+            message
+          );
         },
+
         {
-          enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 0
+          enableHighAccuracy:
+            true,
+
+          timeout:
+            15000,
+
+          maximumAge:
+            0
         }
       );
     }
 
+
     function resetMapLocation() {
-      selectedLatitude = null;
-      selectedLongitude = null;
+
+      selectedLatitude =
+        null;
+
+      selectedLongitude =
+        null;
 
       const defaultLat =
         36.7525;
@@ -1890,6 +2845,7 @@
         3.0420;
 
       if (map) {
+
         map.setView(
           [
             defaultLat,
@@ -1900,10 +2856,13 @@
       }
 
       if (marker) {
-        marker.setLatLng([
-          defaultLat,
-          defaultLng
-        ]);
+
+        marker.setLatLng(
+          [
+            defaultLat,
+            defaultLng
+          ]
+        );
       }
 
       document.getElementById(
@@ -1913,25 +2872,32 @@
 
       document.getElementById(
         "coordinates"
-      ).textContent = "";
+      ).textContent =
+        "";
     }
+
 
     /* =========================
        CONFIRM ORDER
     ========================= */
 
     async function confirmOrder() {
+
       if (!currentUser) {
+
         showToast(
           "سجل الدخول أولا."
         );
+
         return;
       }
 
       if (!cart.length) {
+
         showToast(
           "السلة فارغة."
         );
+
         return;
       }
 
@@ -1946,36 +2912,46 @@
         ).value.trim();
 
       if (!phone) {
+
         showToast(
           "أدخل رقم الهاتف."
         );
+
         return;
       }
 
-      if (address.length < 3) {
+      if (
+        address.length < 3
+      ) {
+
         showToast(
           "أدخل العنوان بالتفصيل."
         );
+
         return;
       }
 
       /*
-        مهم:
         الموقع إجباري
       */
       if (
-        selectedLatitude === null ||
-        selectedLongitude === null
+        selectedLatitude ===
+          null ||
+        selectedLongitude ===
+          null
       ) {
+
         showToast(
           "حدد موقع التوصيل على الخريطة أولا 📍"
         );
+
         return;
       }
 
       const restaurantId =
         Number(
-          cart[0].restaurantId
+          cart[0]
+            .restaurantId
         );
 
       const button =
@@ -1983,37 +2959,50 @@
           "confirmOrderButton"
         );
 
-      button.disabled = true;
+      button.disabled =
+        true;
+
       button.textContent =
         "جاري إرسال الطلب...";
 
       try {
+
         const data =
           await api(
             "/api/orders",
             {
               method: "POST",
-              body: JSON.stringify({
-                restaurantId,
-                items: cart.map(
-                  (item) => ({
-                    productId:
-                      Number(
-                        item.productId
-                      ),
-                    quantity:
-                      Number(
-                        item.quantity
-                      )
-                  })
-                ),
-                address,
-                phone,
-                latitude:
-                  selectedLatitude,
-                longitude:
-                  selectedLongitude
-              })
+
+              body:
+                JSON.stringify({
+
+                  restaurantId,
+
+                  items:
+                    cart.map(
+                      item => ({
+                        productId:
+                          Number(
+                            item.productId
+                          ),
+
+                        quantity:
+                          Number(
+                            item.quantity
+                          )
+                      })
+                    ),
+
+                  address,
+
+                  phone,
+
+                  latitude:
+                    selectedLatitude,
+
+                  longitude:
+                    selectedLongitude
+                })
             }
           );
 
@@ -2035,23 +3024,32 @@
         );
 
       } catch (error) {
+
         showToast(
           error.message
         );
+
       } finally {
-        button.disabled = false;
+
+        button.disabled =
+          false;
+
         button.textContent =
           "✅ تأكيد الطلب";
       }
     }
+
 
     /* =========================
        ORDERS
     ========================= */
 
     async function openOrdersModal() {
+
       if (!currentUser) {
+
         openAuthModal();
+
         return;
       }
 
@@ -2065,9 +3063,12 @@
           جاري تحميل الطلبات...
         </div>`;
 
-      openModal("ordersModal");
+      openModal(
+        "ordersModal"
+      );
 
       try {
+
         const data =
           await api(
             "/api/orders"
@@ -2077,6 +3078,7 @@
           data.orders || [];
 
         if (!orders.length) {
+
           container.innerHTML =
             `<div class="empty">
               ما عندك حتى طلب حاليا.
@@ -2088,36 +3090,46 @@
         container.innerHTML =
           orders
             .map(
-              (order) => {
+              order => {
+
                 let items = [];
 
                 try {
+
                   items =
                     JSON.parse(
                       order.items
                     );
+
                 } catch {
+
                   items = [];
                 }
 
                 const itemsText =
                   items
                     .map(
-                      (item) =>
+                      item =>
                         `${escapeHTML(
                           item.name
                         )} × ${
                           item.quantity
                         }`
                     )
-                    .join("، ");
+                    .join(
+                      "، "
+                    );
 
-                let mapButton = "";
+                let mapButton =
+                  "";
 
                 if (
-                  order.latitude !== null &&
-                  order.longitude !== null
+                  order.latitude !==
+                    null &&
+                  order.longitude !==
+                    null
                 ) {
+
                   const lat =
                     Number(
                       order.latitude
@@ -2136,6 +3148,7 @@
                       lng
                     )
                   ) {
+
                     mapButton =
                       `
                       <a
@@ -2151,35 +3164,46 @@
                 }
 
                 return `
-                  <div class="order-card">
+                  <div
+                    class="order-card"
+                  >
 
                     <strong>
                       الطلب #${order.id}
                     </strong>
 
-                    <div style="margin-top:8px">
+                    <div
+                      style="margin-top:8px"
+                    >
                       ${itemsText}
                     </div>
 
-                    <div style="margin-top:8px">
+                    <div
+                      style="margin-top:8px"
+                    >
                       المجموع:
+
                       <strong>
                         ${Number(
                           order.total
                         ).toLocaleString(
                           "fr-DZ"
-                        )} دج
+                        )}
+                        دج
                       </strong>
                     </div>
 
                     <div>
                       العنوان:
+
                       ${escapeHTML(
                         order.address
                       )}
                     </div>
 
-                    <span class="order-status">
+                    <span
+                      class="order-status"
+                    >
                       ${formatStatus(
                         order.status
                       )}
@@ -2194,6 +3218,7 @@
             .join("");
 
       } catch (error) {
+
         container.innerHTML =
           `<div class="empty">
             ${escapeHTML(
@@ -2203,18 +3228,32 @@
       }
     }
 
-    function formatStatus(status) {
+
+    /* =========================
+       ORDER STATUS
+    ========================= */
+
+    function formatStatus(
+      status
+    ) {
+
       const statuses = {
+
         received:
           "تم استلام الطلب",
+
         preparing:
           "جاري التحضير",
+
         pickup:
           "جاهز للاستلام",
+
         on_the_way:
           "في الطريق 🚗",
+
         delivered:
           "تم التوصيل ✅",
+
         cancelled:
           "ملغى ❌"
       };
@@ -2225,17 +3264,29 @@
       );
     }
 
+
     /* =========================
        INIT
     ========================= */
 
     async function init() {
+
       await checkSession();
-      await loadProducts();
+
+      /*
+        نحمّل المطاعم والمنتجات
+        قبل العرض
+      */
+      await Promise.all([
+        loadRestaurants(),
+        loadProducts()
+      ]);
+
       updateCartUI();
     }
 
     init();
+
   </script>
 
 </body>
